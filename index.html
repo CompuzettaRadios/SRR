@@ -1,80 +1,930 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stereo Revelación Radio</title>
-    <script src="https://raw.githubusercontent.com/CompuzettaRadios/SRR/refs/heads/main/js/jquery-3.2.1.min.js" type="text/javascript"></script>
-    <script src="https://raw.githubusercontent.com/CompuzettaRadios/SRR/refs/heads/main/js/lunaradio.min.js" type="text/javascript"></script>
-</head>
-<body style="margin:0px">
-    <div id="lunaradio" style='width:100%; height:100%;background-image: url("https://www.cutralcoalinstante.com/wp-content/uploads/2020/05/operador-de-radio.jpeg"); background-repeat: no-repeat; background-size: cover; background-position: center;
-    -webkit-border-top-left-radius: 0px;
-      -webkit-border-top-right-radius: 0px;
-      -webkit-border-bottom-right-radius: 0px;
-      -webkit-border-bottom-left-radius: 0px;
-      -moz-border-radius-topleft: 0px;
-      -moz-border-radius-topright: 0px;
-      -moz-border-radius-bottomright: 0px;
-      -moz-border-radius-bottomleft: 0px;
-      border-top-left-radius: 0px;
-      border-top-right-radius: 0px;
-      border-bottom-right-radius: 0px;
-      border-bottom-left-radius: 0px;
-      border: none;'>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="shortcut icon" href="favin.ico" type="image/x-icon" />
+    <!-- jQuery + Lunaradio -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://extassisnetwork.com/player/Luna/luna.js"></script>
+    
+    <style>
+        :root {
+            --panel-bg-opacity: .85;
+        }
         
-        <div style="padding: 10px; color: white; font-size: 12px;">
-            <a href="#" title="STEREO REVELACION RADIO">STEREO REVELACION RADIO</a> Desarrollado por: Compuzetta <a href="#" title="STEREO REVELACION RADIO">STEREO REVELACION RADIO</a>
+        /* Reset & estructura general */
+        html, body{
+            height:100%;
+            margin:0;
+            padding:0;
+            background: linear-gradient(135deg, #1a0d2e 0%, #2d1b69 30%, #16213e 70%, #0f1419 100%);
+            font-family:"Segoe UI", Tahoma, sans-serif;
+            overflow-x:hidden;
+        }
+        
+        /* Contenedor principal - pantalla completa */
+        #compuzetta{
+            display:flex;
+            flex-direction:column;
+            align-items:stretch;
+            width:100vw;
+            height:100vh;
+            padding:0;
+            box-sizing:border-box;
+        }
+        
+        /* Iconos sociales - parte superior */
+        .social-icons{
+            display:flex;
+            justify-content:center;
+            gap:20px;
+            padding:15px;
+            width:100%;
+            background:rgb(26, 13, 46);
+            backdrop-filter:blur(10px);
+            border-bottom:1px solid rgb(26, 13, 46);
+            overflow-x:auto;
+            scroll-snap-type:x mandatory;
+            -webkit-overflow-scrolling:touch;
+            position:relative;
+        }
+        
+        .social-icons a{
+            flex:0 0 auto; 
+            scroll-snap-align:center;
+        }
+        
+        /* Iconos sociales responsivos CORREGIDOS */
+        .social-icons img{
+            width: 14vw;
+            max-width: 45px;
+            min-width: 30px;
+            transition: transform .3s;
+        }
+        
+        .social-icons img:hover{
+            transform:scale(1.15);
+        }
+        
+        /* Media queries específicos para iconos */
+        @media (max-width: 480px) {
+            .social-icons{
+                gap: 15px;
+                padding: 12px;
+            }
+            .social-icons img{
+                width: 12vw;
+                max-width: 35px;
+                min-width: 25px;
+            }
+        }
+        
+        @media (min-width: 481px) and (max-width: 767px) {
+            .social-icons img{
+                width: 10vw;
+                max-width: 50px;
+                min-width: 35px;
+            }
+        }
+        
+        @media (min-width: 768px){
+            .social-icons{
+                overflow-x: visible;
+            }
+            .social-icons img{
+                width: 60px;
+                max-width: 60px;
+                min-width: 60px;
+            }
+        }
+        
+        /* Animación para el icono LIVE del reproductor Lunaradio */
+        #extassisnetwork .live-active,
+        #extassisnetwork .luna-live-icon,
+        #extassisnetwork .live-icon,
+        #extassisnetwork [class*="live"],
+        #extassisnetwork .status-icon,
+        #extassisnetwork .connection-indicator {
+            animation: liveBlinking 1.5s infinite !important;
+            filter: drop-shadow(0 0 8px #ff0000) !important;
+        }
+        
+        /* Buscar iconos por posición común en reproductores */
+        #extassisnetwork .luna-controls > *:last-child,
+        #extassisnetwork .controls > *:last-child {
+            transition: all 0.3s ease;
+        }
+        
+        /* Clase específica para activar la animación */
+        .live-active {
+            animation: liveBlinking 1.5s infinite !important;
+            filter: drop-shadow(0 0 8px #ff0000) !important;
+        }
+        
+        @keyframes liveBlinking {
+            0%, 100% { 
+                opacity: 1; 
+                transform: scale(1);
+                filter: drop-shadow(0 0 8px #ff0000);
+            }
+            50% { 
+                opacity: 0.3; 
+                transform: scale(1.1);
+                filter: drop-shadow(0 0 15px #ff4444);
+            }
+        }
+        
+        /* Reproductor - ocupa todo el espacio restante */
+        #extassisnetwork{
+            width:100% !important;
+            height:100% !important;
+            flex:1 1 auto;
+            background:transparent;
+            border:none;
+        }
+        
+        /* Botón flecha */
+        #toggleArrow{
+            position:fixed;
+            top:50%;
+            right:15px;
+            transform:translateY(-50%);
+            cursor:pointer;
+            z-index:1001;
+            width:35px;
+            height:35px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:rgba(255,224,0,0.1);
+            border-radius:50%;
+            backdrop-filter:blur(10px);
+            border:2px solid rgba(255,224,0,0.3);
+            transition:all .3s ease;
+        }
+        
+        #toggleArrow:hover{
+            background:rgba(255,224,0,0.2);
+            border-color:rgba(255,224,0,0.6);
+            box-shadow:0 0 20px rgba(255,224,0,0.4);
+        }
+        
+        #toggleArrow svg{
+            width:20px;
+            height:20px;
+            stroke:url(#grad1);
+            stroke-width:3;
+            fill:none;
+            stroke-linecap:round;
+            stroke-linejoin:round;
+            transition:transform .3s;
+        }
+        
+        #toggleArrow:hover svg{
+            transform:scale(1.1);
+        }
+        
+        /* Panel lateral */
+        .schedule-panel{
+            position:fixed;
+            top:0;
+            left:-280px;
+            width:280px;
+            height:100vh;
+            padding:25px;
+            box-sizing:border-box;
+            background:rgba(10,10,30,var(--panel-bg-opacity));
+            backdrop-filter:blur(15px);
+            color:#fff;
+            border-right:2px solid rgba(255,224,0,0.3);
+            box-shadow:4px 0 30px rgba(255,224,0,.2);
+            transition:left .4s ease;
+            z-index:1000;
+        }
+        
+        .schedule-panel.active{
+            left:0;
+        }
+        
+        .schedule-panel h3{
+            margin:0 0 20px;
+            text-align:center;
+            color:#FFE000;
+            font-size:1.3em;
+            font-weight:600;
+            text-shadow:0 0 10px rgba(255,224,0,0.5);
+        }
+        
+        /* Iframe del slider */
+        .ads-frame{
+            width:100%;
+            height:calc(100vh - 100px);
+            border:0;
+            border-radius:15px;
+            overflow:hidden;
+            background:rgba(0,0,0,0.2);
+        }
+        
+        @media (max-width:600px){
+            .schedule-panel{
+                width:90%; 
+                left:-90%;
+            }
+            .schedule-panel.active{
+                left:0;
+            }
+        }
+        
+        /* Overlay para cerrar panel en móvil */
+        .panel-overlay{
+            position:fixed;
+            top:0;
+            left:0;
+            width:100vw;
+            height:100vh;
+            background:rgba(0,0,0,0.5);
+            z-index:999;
+            opacity:0;
+            visibility:hidden;
+            transition:all .3s ease;
+        }
+        
+        .panel-overlay.active{
+            opacity:1;
+            visibility:visible;
+        }
+        
+        /* Indicador de conexión */
+        .connection-status{
+            position: absolute;
+            top: 50%;
+            right: 80px;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,0,0,0.3);
+            padding: 6px 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,224,0,0.2);
+        }
+        
+        .status-dot{
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff0000;
+            animation: statusPulse 2s infinite;
+        }
+        
+        .status-dot.online{
+            background: #00ff00;
+        }
+        
+        .status-text{
+            color: #fff;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Notificación de segundo plano */
+        .background-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 224, 0, 0.9);
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 10000;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 224, 0, 0.5);
+            box-shadow: 0 4px 20px rgba(255, 224, 0, 0.3);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .background-notification.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .background-notification.hide {
+            transform: translateX(-50%) translateY(-100px);
+            opacity: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="compuzetta">
+        <!-- Iconos sociales -->
+        <div class="social-icons">
+            <a href="https://www.facebook.com/profile.php?id=100067028263478" target="_blank">
+                <img src="https://stereorevelacionradio.com/wp-content/uploads/2023/05/face-150x150.png" alt="Facebook">
+            </a>
+            <a href="https://api.whatsapp.com/send?phone=51931093417" target="_blank">
+                <img src="https://stereorevelacionradio.com/wp-content/uploads/2023/05/whstsapp-150x150.png" alt="WhatsApp">
+            </a>
+            <a href="https://www.youtube.com/@stereorevelacionradio" target="_blank">
+                <img src="https://stereorevelacionradio.com/wp-content/uploads/2023/05/yt-150x150.png" alt="YouTube">
+            </a>
+            <a href="https://www.stereorevelacionradio.com" target="_blank">
+                <img src="https://stereorevelacionradio.com/wp-content/uploads/2023/05/pagina-150x150.png" alt="Web">
+            </a>
         </div>
         
-        <div id="lunaradio-player" style="width:100%; height:550px;"></div>
-        
-        <script type="text/javascript">
-        $(document).ready(function() {
-            $("#lunaradio-player").lunaradio({
-                userinterface: "big",
-                backgroundcolor: "rgba(9,15,25,0.8)",
-                fontcolor: "#FFFFFF",
-                hightlightcolor: "#FF0000",
-                fontname: "Saira Condensed",
-                googlefont: "Saira+Condensed:wght@100",
-                fontratio: "0.3",
-                radioname: "Stereo Revelación Radio",
-                scroll: "true",
-                coverimage: "https://stereorevelacionradio.com/wp-content/uploads/2022/12/logo-radio.png",
-                usevisualizer: "fake",
-                coverstyle: "animated",
-                visualizertype: "6",
-                multicolorvisualizer: "true",
-                color1: "dc143c",
-                color2: "f1666d",
-                color3: "e6f62f",
-                color4: "#e6f62f",
-                itunestoken: "1000lIPN",
-                metadatatechnic: "corsproxy",
-                ownmetadataurl: "",
-                streamurl: "https://cast6.my-control-panel.com/proxy/manrique/stream",
-                streamtype: "radiozeno",
-                icecastmountpoint: "/radio.mp3",
-                radionomyid: "",
-                radionomyapikey: "",
-                radiozenoid: "utztqpdbt0hvv",
-                radiojarid: "",
-                radiocoid: "",
-                shoutcastpath: "/stream",
-                shoutcastid: "1",
-                streamsuffix: "",
-                metadatainterval: "20000",
-                volume: "95",
-                debug: "false",
-                usestreamcorsproxy: "false",
-                corsproxy: "https://corsradio.herokuapp.com/index.php?q=",
-                autoplay: "true"
-            });
-        });
-        </script>
+        <!-- Reproductor - pantalla completa -->
+        <div id="extassisnetwork"></div>
     </div>
     
-    <script src="js/rocket-loader.min.js" defer></script>
+    <!-- Overlay para cerrar panel -->
+    <div class="panel-overlay" id="panelOverlay"></div>
+    
+    <!-- Botón abrir/cerrar panel -->
+    <div id="toggleArrow">
+        <svg viewBox="0 0 24 24">
+            <defs>
+                <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#FFF44F"></stop>
+                    <stop offset="100%" stop-color="#FFD700"></stop>
+                </linearGradient>
+            </defs>
+            <path d="M6 4l12 8-12 8"></path>
+        </svg>
+    </div>
+    
+    <!-- Panel lateral -->
+    <div class="schedule-panel" id="schedulePanel">
+        <h3>Publicidad</h3>
+        <iframe class="ads-frame" src="https://stereorevelacionradio.com/appradio/publicidad.html" loading="lazy"></iframe>
+    </div>
+
+    <!-- Notificación de segundo plano -->
+    <div class="background-notification" id="backgroundNotification">
+        🎵 Radio funcionando en segundo plano
+    </div>
+    
+    <script>
+        let playerInstance = null;
+        let isConnected = false;
+        let wakeLock = null;
+        let audioContext = null;
+        let isBackgroundMode = false;
+        let isAppMode = false;
+        let fallbackAudio = null;
+
+        // Detectar si estamos en una app híbrida
+        function detectAppMode() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            const isApp = window.cordova || window.PhoneGap || window.phonegap || 
+                         userAgent.includes('wv') || userAgent.includes('cordova') ||
+                         window.Android || window.webkit?.messageHandlers ||
+                         !window.chrome || navigator.standalone;
+            
+            isAppMode = isApp;
+            console.log('Modo detectado:', isApp ? 'APP' : 'NAVEGADOR');
+            return isApp;
+        }
+        
+        /* Mostrar/Ocultar panel */
+        $('#toggleArrow').on('click', e=>{
+            e.stopPropagation();
+            $('#schedulePanel').toggleClass('active');
+            $('#panelOverlay').toggleClass('active');
+        });
+        
+        $('#panelOverlay').on('click', e=>{
+            $('#schedulePanel').removeClass('active');
+            $('#panelOverlay').removeClass('active');
+        });
+        
+        $(document).on('click', e=>{
+            if(!$(e.target).closest('#schedulePanel,#toggleArrow').length){
+                $('#schedulePanel').removeClass('active');
+                $('#panelOverlay').removeClass('active');
+            }
+        });
+        
+        /* Función para activar animación del icono LIVE nativo */
+        function activateLiveIcon() {
+            // Buscar y animar iconos comunes del reproductor
+            setTimeout(() => {
+                // Intentar diferentes selectores para el icono LIVE
+                const selectors = [
+                    '#extassisnetwork .luna-live',
+                    '#extassisnetwork .live-indicator',
+                    '#extassisnetwork [class*="live"]',
+                    '#extassisnetwork .status-icon',
+                    '#extassisnetwork .connection-indicator',
+                    '#extassisnetwork .luna-controls > span:last-child',
+                    '#extassisnetwork .controls > span:last-child',
+                    '#extassisnetwork [style*="color: red"]',
+                    '#extassisnetwork [style*="color:#ff"]'
+                ];
+                
+                selectors.forEach(selector => {
+                    $(selector).addClass('live-active');
+                });
+                
+                // Forzar animación en elementos rojos
+                $('#extassisnetwork').find('*').each(function() {
+                    const element = $(this);
+                    const computedStyle = window.getComputedStyle(this);
+                    const color = computedStyle.color;
+                    
+                    if (color.includes('rgb(255, 0, 0)') || 
+                        color.includes('#ff0000') || 
+                        color.includes('#f00') ||
+                        element.text().toLowerCase().includes('live') ||
+                        element.text().includes('●')) {
+                        element.addClass('live-active');
+                    }
+                });
+                
+            }, 1000);
+        }
+
+        /* Funciones para segundo plano */
+        
+        // Wake Lock API para mantener la pantalla activa (opcional)
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Wake Lock activado');
+                    
+                    wakeLock.addEventListener('release', () => {
+                        console.log('Wake Lock liberado');
+                    });
+                }
+            } catch (err) {
+                console.log('Wake Lock no disponible:', err);
+            }
+        }
+
+        // Liberar Wake Lock
+        function releaseWakeLock() {
+            if (wakeLock) {
+                wakeLock.release();
+                wakeLock = null;
+            }
+        }
+
+        // Inicializar AudioContext para segundo plano
+        function initAudioContext() {
+            try {
+                window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!audioContext) {
+                    audioContext = new AudioContext();
+                }
+                
+                // Reanudar contexto si está suspendido
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+            } catch (err) {
+                console.log('AudioContext no disponible:', err);
+            }
+        }
+
+        // Media Session API mejorada para apps
+        function setupMediaSession() {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: 'STEREO REVELACIÓN RADIO',
+                    artist: 'En Vivo',
+                    album: 'Radio Stream',
+                    artwork: [
+                        { src: 'https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png', sizes: '96x96', type: 'image/png' },
+                        { src: 'https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png', sizes: '128x128', type: 'image/png' },
+                        { src: 'https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png', sizes: '192x192', type: 'image/png' },
+                        { src: 'https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png', sizes: '256x256', type: 'image/png' },
+                        { src: 'https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png', sizes: '384x384', type: 'image/png' },
+                        { src: 'https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png', sizes: '512x512', type: 'image/png' }
+                    ]
+                });
+
+                // Configurar acciones del Media Session
+                navigator.mediaSession.setActionHandler('play', () => {
+                    if (isAppMode && fallbackAudio) {
+                        fallbackAudio.play();
+                    } else {
+                        const playButton = $('#extassisnetwork').find('.luna-play, [class*="play"], .play-button, #playButton').first();
+                        if (playButton.length) {
+                            playButton.click();
+                        }
+                    }
+                });
+
+                navigator.mediaSession.setActionHandler('pause', () => {
+                    if (isAppMode && fallbackAudio) {
+                        fallbackAudio.pause();
+                    } else {
+                        const pauseButton = $('#extassisnetwork').find('.luna-pause, [class*="pause"], .pause-button').first();
+                        if (pauseButton.length) {
+                            pauseButton.click();
+                        }
+                    }
+                });
+
+                // Actualizar estado de reproducción
+                navigator.mediaSession.playbackState = isConnected ? 'playing' : 'paused';
+            }
+        }
+
+        // Mostrar notificación de segundo plano
+        function showBackgroundNotification() {
+            const notification = $('#backgroundNotification');
+            notification.addClass('show');
+            
+            setTimeout(() => {
+                notification.removeClass('show').addClass('hide');
+                setTimeout(() => {
+                    notification.removeClass('hide');
+                }, 300);
+            }, 3000);
+        }
+
+        // Detectar cuando la pestaña pasa a segundo plano
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && isConnected) {
+                isBackgroundMode = true;
+                showBackgroundNotification();
+                console.log('Página en segundo plano - manteniendo audio');
+                
+                // Reanudar contexto de audio si es necesario
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+            } else if (!document.hidden) {
+                isBackgroundMode = false;
+                console.log('Página en primer plano');
+            }
+        });
+
+        // Prevenir pausado automático en móviles
+        document.addEventListener('touchstart', () => {
+            initAudioContext();
+        }, { once: true });
+
+        document.addEventListener('click', () => {
+            initAudioContext();
+        }, { once: true });
+
+        // Crear reproductor de respaldo para apps
+        function createFallbackPlayer() {
+            if (!fallbackAudio) {
+                fallbackAudio = new Audio();
+                fallbackAudio.crossOrigin = "anonymous";
+                fallbackAudio.preload = "none";
+                
+                // Configurar eventos del audio de respaldo
+                fallbackAudio.addEventListener('loadstart', () => {
+                    console.log('Fallback audio: cargando...');
+                });
+                
+                fallbackAudio.addEventListener('canplay', () => {
+                    console.log('Fallback audio: listo para reproducir');
+                    isConnected = true;
+                    activateLiveIcon();
+                    setupMediaSession();
+                });
+                
+                fallbackAudio.addEventListener('play', () => {
+                    console.log('Fallback audio: reproduciendo');
+                    isConnected = true;
+                    if ('mediaSession' in navigator) {
+                        navigator.mediaSession.playbackState = 'playing';
+                    }
+                });
+                
+                fallbackAudio.addEventListener('pause', () => {
+                    console.log('Fallback audio: pausado');
+                    isConnected = false;
+                    if ('mediaSession' in navigator) {
+                        navigator.mediaSession.playbackState = 'paused';
+                    }
+                });
+                
+                fallbackAudio.addEventListener('error', (e) => {
+                    console.log('Error en fallback audio:', e);
+                    setTimeout(() => {
+                        if (fallbackAudio && !fallbackAudio.paused) {
+                            fallbackAudio.load();
+                            fallbackAudio.play().catch(console.error);
+                        }
+                    }, 5000);
+                });
+            }
+        }
+
+        // Inicializar reproductor según el modo
+        function initPlayer() {
+            detectAppMode();
+            
+            if (isAppMode) {
+                console.log('Modo APP: Usando reproductor híbrido');
+                initHybridPlayer();
+            } else {
+                console.log('Modo NAVEGADOR: Usando Lunaradio');
+                initLunaradioPlayer();
+            }
+        }
+
+        // Reproductor híbrido para apps
+        function initHybridPlayer() {
+            createFallbackPlayer();
+            
+            // Intentar Lunaradio primero, con fallback
+            try {
+                $("#extassisnetwork").lunaradio({
+                    streamurl: "https://cast6.my-control-panel.com/proxy/manrique/",
+                    radioname: "STEREO REVELACIÓN RADIO",
+                    coverimage: "https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png",
+                    onlycoverimage: false,
+                    userinterface: "big",
+                    backgroundcolor: "#1a0d2e",
+                    fontcolor: "#FFFFFF",
+                    hightlightcolor: "#FFE000",
+                    fontname: "Segoe UI",
+                    usevisualizer: "fake", // Usar fake en apps
+                    visualizertype: "3",
+                    streamtype: "shoutcast2",
+                    shoutcastpath: "/stream",
+                    shoutcastid: "1",
+                    volume: "90",
+                    autoplay: "false", // No autoplay en apps
+                    usestreamcorsproxy: "true",
+                    
+                    onPlay: function() {
+                        console.log('Lunaradio: Reproducción iniciada');
+                        isConnected = true;
+                        activateLiveIcon();
+                        setupMediaSession();
+                        initAudioContext();
+                    },
+                    onStop: function() {
+                        console.log('Lunaradio: Reproducción detenida');
+                        isConnected = false;
+                    },
+                    onError: function() {
+                        console.log('Lunaradio falló, usando reproductor nativo');
+                        useFallbackPlayer();
+                    }
+                });
+                
+                // Timeout para fallback si Lunaradio no carga
+                setTimeout(() => {
+                    if (!isConnected && $('#extassisnetwork').is(':empty')) {
+                        console.log('Lunaradio no cargó, usando fallback');
+                        useFallbackPlayer();
+                    }
+                }, 10000);
+                
+            } catch (error) {
+                console.log('Error inicializando Lunaradio:', error);
+                useFallbackPlayer();
+            }
+        }
+
+        // Usar reproductor de respaldo
+        function useFallbackPlayer() {
+            $('#extassisnetwork').html(`
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; background: linear-gradient(135deg, #1a0d2e 0%, #2d1b69 30%, #16213e 70%, #0f1419 100%); color: white; text-align: center; padding: 20px;">
+                    <img src="https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png" style="width: 150px; height: 150px; border-radius: 20px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(255,224,0,0.3);" alt="Logo">
+                    <h2 style="color: #FFE000; margin: 20px 0; font-size: 24px; text-shadow: 0 0 10px rgba(255,224,0,0.5);">STEREO REVELACIÓN RADIO</h2>
+                    <div id="playButton" style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(45deg, #FFE000, #FFA500); display: flex; align-items: center; justify-content: center; cursor: pointer; margin: 20px; box-shadow: 0 8px 25px rgba(255,224,0,0.4); transition: all 0.3s;">
+                        <div id="playIcon" style="width: 0; height: 0; border-left: 25px solid #000; border-top: 15px solid transparent; border-bottom: 15px solid transparent; margin-left: 5px;"></div>
+                        <div id="pauseIcon" style="display: none;">
+                            <div style="width: 8px; height: 30px; background: #000; display: inline-block; margin: 0 2px;"></div>
+                            <div style="width: 8px; height: 30px; background: #000; display: inline-block; margin: 0 2px;"></div>
+                        </div>
+                    </div>
+                    <div id="statusText" style="color: #ccc; margin-top: 20px;">Toca para reproducir</div>
+                    <div id="visualizer" style="width: 200px; height: 50px; margin: 20px 0; display: none;">
+                        <div style="display: flex; align-items: end; justify-content: center; height: 100%; gap: 3px;">
+                            ${Array.from({length: 20}, (_, i) => `<div class="bar" style="width: 6px; background: linear-gradient(to top, #FFE000, #FF6B35); border-radius: 3px; animation: wave ${Math.random() * 0.5 + 0.5}s infinite alternate;"></div>`).join('')}
+                        </div>
+                    </div>
+                </div>
+                <style>
+                    @keyframes wave {
+                        0% { height: 10px; }
+                        100% { height: 40px; }
+                    }
+                    #playButton:hover {
+                        transform: scale(1.1);
+                        box-shadow: 0 12px 35px rgba(255,224,0,0.6);
+                    }
+                </style>
+            `);
+
+            // Configurar eventos del botón
+            $('#playButton').on('click', function() {
+                if (fallbackAudio.paused) {
+                    fallbackAudio.src = "https://cast6.my-control-panel.com/proxy/manrique/stream";
+                    fallbackAudio.load();
+                    fallbackAudio.play().then(() => {
+                        $('#playIcon').hide();
+                        $('#pauseIcon').show();
+                        $('#statusText').html('🔴 EN VIVO');
+                        $('#visualizer').show();
+                        isConnected = true;
+                        setupMediaSession();
+                    }).catch(err => {
+                        console.error('Error reproduciendo:', err);
+                        $('#statusText').html('Error de conexión');
+                    });
+                } else {
+                    fallbackAudio.pause();
+                    $('#playIcon').show();
+                    $('#pauseIcon').hide();
+                    $('#statusText').html('Pausado');
+                    $('#visualizer').hide();
+                    isConnected = false;
+                }
+            });
+        }
+
+        /* Reproductor normal para navegadores */
+        function initLunaradioPlayer() {
+            $("#extassisnetwork").lunaradio({
+            streamurl: "https://cast6.my-control-panel.com/proxy/manrique/",
+            radioname: "STEREO REVELACIÓN RADIO",
+            coverimage: "https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png",
+            onlycoverimage: false,
+            userinterface: "big",
+            backgroundcolor: "#1a0d2e",
+            fontcolor: "#FFFFFF",
+            hightlightcolor: "#FFE000",
+            fontname: "Segoe UI",
+            googlefont: "",
+            fontratio: "0.35",
+            scroll: "true",
+            coverstyle: "animated",
+            
+            // Configuración mejorada del visualizador
+            usevisualizer: "real",
+            visualizertype: "6",
+            multicolorvisualizer: "true",
+            color1: "#FF6B35",
+            color2: "#F7931E", 
+            color3: "#FFD700",
+            color4: "#32CD32",
+            color5: "#00CED1",
+            color6: "#9A4FD4",
+            visualizercolor: "#FFE000",
+            visualizerstroke: "2",
+            visualizerradius: "2",
+            
+            streamtype: "shoutcast2",
+            shoutcastpath: "/stream",
+            shoutcastid: "1",
+            metadatainterval: "5000",
+            volume: "90",
+            autoplay: "true",
+            usestreamcorsproxy: "true",
+            
+            // Callbacks para estado
+            onPlay: function() {
+                console.log('Reproducción iniciada');
+                activateLiveIcon();
+                isConnected = true;
+                
+                // Configurar para segundo plano
+                initAudioContext();
+                setupMediaSession();
+                requestWakeLock();
+                
+                // Actualizar Media Session
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.playbackState = 'playing';
+                }
+            },
+            onStop: function() {
+                console.log('Reproducción detenida');
+                $('#extassisnetwork .live-active').removeClass('live-active');
+                isConnected = false;
+                
+                // Limpiar recursos de segundo plano
+                releaseWakeLock();
+                
+                // Actualizar Media Session
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.playbackState = 'paused';
+                }
+            },
+            onError: function() {
+                console.log('Error en reproducción');
+                $('#extassisnetwork .live-active').removeClass('live-active');
+                isConnected = false;
+                releaseWakeLock();
+                
+                // Fallback: intentar visualizador fake si falla el real
+                setTimeout(() => {
+                    $("#extassisnetwork").lunaradio('destroy');
+                    $("#extassisnetwork").lunaradio({
+                        streamurl: "https://cast6.my-control-panel.com/proxy/manrique/",
+                        radioname: "STEREO REVELACIÓN RADIO",
+                        coverimage: "https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png",
+                        onlycoverimage: false,
+                        userinterface: "big",
+                        backgroundcolor: "#1a0d2e",
+                        fontcolor: "#FFFFFF",
+                        hightlightcolor: "#FFE000",
+                        fontname: "Segoe UI",
+                        usevisualizer: "fake",
+                        visualizertype: "3",
+                        multicolorvisualizer: "true",
+                        color1: "#FF6B35",
+                        color2: "#F7931E",
+                        color3: "#FFD700",
+                        streamtype: "shoutcast2",
+                        shoutcastpath: "/stream",
+                        shoutcastid: "1",
+                        volume: "90",
+                        autoplay: "true",
+                        usestreamcorsproxy: "true",
+                        onPlay: function() {
+                            activateLiveIcon();
+                            isConnected = true;
+                            initAudioContext();
+                            setupMediaSession();
+                            requestWakeLock();
+                        },
+                        onStop: function() {
+                            isConnected = false;
+                            releaseWakeLock();
+                        }
+                    });
+                }, 3000);
+            }
+            });
+        }
+        
+        // Bloquear la tecla F12
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'F12') {
+                event.preventDefault();
+            }
+        });
+
+        // Bloquear el clic derecho
+        document.addEventListener('contextmenu', function(event) {
+            event.preventDefault();
+        });
+
+        // Mantener conexión activa en segundo plano
+        setInterval(() => {
+            if (isConnected && audioContext) {
+                // Crear un tono silencioso para mantener el contexto activo
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+            }
+        }, 30000); // Cada 30 segundos
+        
+        // Inicializar cuando el documento esté listo
+        $(document).ready(function() {
+            console.log('Inicializando reproductor...');
+            initPlayer();
+        });
+        
+        // Activar icono después de cargar el reproductor
+        setTimeout(() => {
+            activateLiveIcon();
+            
+            // Verificar periódicamente si el reproductor está activo
+            setInterval(() => {
+                if (isConnected) {
+                    activateLiveIcon();
+                }
+            }, 5000);
+        }, 2000);
+
+        // Manejar eventos de ventana para segundo plano
+        window.addEventListener('beforeunload', () => {
+            releaseWakeLock();
+        });
+
+        // Detectar cuando la app vuelve del segundo plano (para móviles)
+        window.addEventListener('focus', () => {
+            if (isConnected && audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        });
+    </script>
 </body>
 </html>
