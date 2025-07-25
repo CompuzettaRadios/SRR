@@ -1,97 +1,646 @@
-
+<!doctype html>
+<html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>"RADIO"</title>
-<link rel="shortcut icon" type="image/x-icon" href="favin.ico" />
-<script src="https://raw.githubusercontent.com/CompuzettaRadios/SRR/refs/heads/main/js/jquery-3.2.1.min.js"></script>
-<script src="https://raw.githubusercontent.com/CompuzettaRadios/SRR/refs/heads/main/js/lunaradio.min.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="shortcut icon" href="favin.ico" type="image/x-icon" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#1a0d2e" />
+    <meta name="background-color" content="#1a0d2e" />
+    <meta name="display" content="standalone" />
+    <meta name="orientation" content="portrait" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="STEREO REVELACIÓN" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/png" href="https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png" />
+    <link rel="apple-touch-icon" href="https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png" />
+    <link rel="apple-touch-icon" sizes="167x167" href="https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json" />
+    
+    <!-- jQuery + Lunaradio -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://extassisnetwork.com/player/Luna/luna.js"></script>
+    
+    <style>
+        /* Reset & estructura general */
+        html, body{
+            height:100%;
+            margin:0;
+            padding:0;
+            background: linear-gradient(135deg, #1a0d2e 0%, #2d1b69 30%, #16213e 70%, #0f1419 100%);
+            font-family:"Segoe UI", Tahoma, sans-serif;
+            overflow-x:hidden;
+        }
+        
+        /* Iconos sociales */
+        .social-icons{
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            gap:20px;
+            padding:20px 15px;
+            width:100%;
+            background:rgb(26, 13, 46);
+            backdrop-filter:blur(10px);
+            border-bottom:1px solid rgb(26, 13, 46);
+            overflow-x:auto;
+            scroll-snap-type:x mandatory;
+            -webkit-overflow-scrolling:touch;
+            position:relative;
+            min-height:80px;
+        }
+        
+        .social-icons a{
+            flex:0 0 auto; 
+            scroll-snap-align:center;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+
+        .social-icons img{
+            width: 50px;
+            height: 50px;
+            max-width: 60px;
+            min-width: 45px;
+            transition: transform .3s;
+            object-fit: contain;
+        }
+
+        .social-icons img:hover{
+            transform:scale(1.15);
+        }
+        
+        /* Media queries para iconos */
+        @media (max-width: 374px) {
+            .social-icons{
+                gap: 12px;
+                padding: 15px 10px;
+                min-height: 70px;
+            }
+            .social-icons img{
+                width: 40px;
+                height: 40px;
+                min-width: 38px;
+                max-width: 42px;
+            }
+        }
+
+        @media (min-width: 375px) and (max-width: 424px) {
+            .social-icons{
+                gap: 15px;
+                padding: 18px 12px;
+                min-height: 75px;
+            }
+            .social-icons img{
+                width: 45px;
+                height: 45px;
+                min-width: 42px;
+                max-width: 48px;
+            }
+        }
+
+        @media (min-width: 768px){
+            .social-icons{
+                overflow-x: visible;
+                gap: 30px;
+                padding: 25px;
+                min-height: 100px;
+            }
+            .social-icons img{
+                width: 65px;
+                height: 65px;
+                max-width: 65px;
+                min-width: 65px;
+            }
+        }
+
+        /* Contenedor principal */
+        #compuzetta{
+            display:flex;
+            flex-direction:column;
+            align-items:stretch;
+            width:100vw;
+            height:100vh;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        /* Reproductor */
+        #extassisnetwork{
+            width:100% !important;
+            height:100% !important;
+            flex:1 1 auto;
+            background:transparent;
+            border:none;
+            min-height:0;
+        }
+        
+        /* Botón flecha */
+        #toggleArrow{
+            position:fixed;
+            top:50%;
+            right:15px;
+            transform:translateY(-50%);
+            cursor:pointer;
+            z-index:1001;
+            width:35px;
+            height:35px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:rgba(255,224,0,0.1);
+            border-radius:50%;
+            backdrop-filter:blur(10px);
+            border:2px solid rgba(255,224,0,0.3);
+            transition:all .3s ease;
+        }
+        
+        #toggleArrow:hover{
+            background:rgba(255,224,0,0.2);
+            border-color:rgba(255,224,0,0.6);
+            box-shadow:0 0 20px rgba(255,224,0,0.4);
+        }
+        
+        #toggleArrow svg{
+            width:20px;
+            height:20px;
+            stroke:url(#grad1);
+            stroke-width:3;
+            fill:none;
+            stroke-linecap:round;
+            stroke-linejoin:round;
+            transition:transform .3s;
+        }
+        
+        /* Panel lateral */
+        .schedule-panel{
+            position:fixed;
+            top:0;
+            left:-280px;
+            width:280px;
+            height:100vh;
+            padding:25px;
+            box-sizing:border-box;
+            background:rgba(10,10,30,0.85);
+            backdrop-filter:blur(15px);
+            color:#fff;
+            border-right:2px solid rgba(255,224,0,0.3);
+            box-shadow:4px 0 30px rgba(255,224,0,.2);
+            transition:left .4s ease;
+            z-index:1000;
+        }
+        
+        .schedule-panel.active{
+            left:0;
+        }
+        
+        .schedule-panel h3{
+            margin:0 0 20px;
+            text-align:center;
+            color:#FFE000;
+            font-size:1.3em;
+            font-weight:600;
+            text-shadow:0 0 10px rgba(255,224,0,0.5);
+        }
+        
+        .ads-frame{
+            width:100%;
+            height:calc(100vh - 100px);
+            border:0;
+            border-radius:15px;
+            overflow:hidden;
+            background:rgba(0,0,0,0.2);
+        }
+        
+        @media (max-width:600px){
+            .schedule-panel{
+                width:90%; 
+                left:-90%;
+            }
+            .schedule-panel.active{
+                left:0;
+            }
+        }
+        
+        /* Overlay para cerrar panel */
+        .panel-overlay{
+            position:fixed;
+            top:0;
+            left:0;
+            width:100vw;
+            height:100vh;
+            background:rgba(0,0,0,0.5);
+            z-index:999;
+            opacity:0;
+            visibility:hidden;
+            transition:all .3s ease;
+        }
+        
+        .panel-overlay.active{
+            opacity:1;
+            visibility:visible;
+        }
+
+        /* Notificación de segundo plano */
+        .background-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 224, 0, 0.9);
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 10000;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 224, 0, 0.5);
+            box-shadow: 0 4px 20px rgba(255, 224, 0, 0.3);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .background-notification.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .background-notification.hide {
+            transform: translateX(-50%) translateY(-100px);
+            opacity: 0;
+        }
+
+        /* Notificación de instalación PWA */
+        .install-banner {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #FFE000 0%, #FFA500 100%);
+            color: #000;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 10000;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 224, 0, 0.5);
+            box-shadow: 0 4px 20px rgba(255, 224, 0, 0.4);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .install-banner.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .install-banner:hover {
+            transform: translateX(-50%) translateY(-5px);
+            box-shadow: 0 8px 30px rgba(255, 224, 0, 0.6);
+        }
+
+        /* Botón cerrar banner */
+        .install-banner .close-btn {
+            margin-left: 15px;
+            background: rgba(0,0,0,0.2);
+            border: none;
+            color: #000;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
 </head>
 
-<body style="margin:0px">
+<body>
+    <div id="compuzetta">
+        <!-- Iconos sociales -->
+        <div class="social-icons">
+            <a href="https://www.facebook.com/profile.php?id=100067028263478" target="_blank">
+                <img src="https://stereorevelacionradio.com/wp-content/uploads/2023/05/face-150x150.png" alt="Facebook">
+            </a>
+            <a href="https://api.whatsapp.com/send?phone=51931093417" target="_blank">
+                <img src="https://stereorevelacionradio.com/wp-content/uploads/2023/05/whstsapp-150x150.png" alt="WhatsApp">
+            </a>
+            <a href="https://www.youtube.com/@stereorevelacionradio" target="_blank">
+                <img src="https://stereorevelacionradio.com/wp-content/uploads/2023/05/yt-150x150.png" alt="YouTube">
+            </a>
+            <a href="https://www.stereorevelacionradio.com" target="_blank">
+                <img src="https://stereorevelacionradio.com/wp-content/uploads/2023/05/pagina-150x150.png" alt="Web">
+            </a>
+        </div>
+        
+        <!-- Reproductor -->
+        <div id="extassisnetwork"></div>
+    </div>
+    
+    <!-- Overlay para cerrar panel -->
+    <div class="panel-overlay" id="panelOverlay"></div>
+    
+    <!-- Botón abrir/cerrar panel -->
+    <div id="toggleArrow">
+        <svg viewBox="0 0 24 24">
+            <defs>
+                <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#FFF44F"></stop>
+                    <stop offset="100%" stop-color="#FFD700"></stop>
+                </linearGradient>
+            </defs>
+            <path d="M6 4l12 8-12 8"></path>
+        </svg>
+    </div>
+    
+    <!-- Panel lateral -->
+    <div class="schedule-panel" id="schedulePanel">
+        <h3>Publicidad</h3>
+        <iframe class="ads-frame" src="https://stereorevelacionradio.com/appradio/publicidad.html" loading="lazy"></iframe>
+    </div>
 
-<div id="compuzetta" style='width:100%; height:100%;background-image: url(""); background-repeat: no-repeat; background-size: cover; background-position: center;
+    <!-- Notificación de segundo plano -->
+    <div class="background-notification" id="backgroundNotification">
+        🎵 Radio funcionando en segundo plano
+    </div>
 
+    <!-- Banner de instalación PWA -->
+    <div class="install-banner" id="installBanner">
+        📱 ¡Instala la app en tu dispositivo!
+        <button class="close-btn" id="closeBanner">×</button>
+    </div>
+    
+    <script>
+        let isConnected = false;
+        let audioContext = null;
+        let wakeLock = null;
+        let deferredPrompt = null;
+        
+        /* Panel lateral */
+        $('#toggleArrow').on('click', e=>{
+            e.stopPropagation();
+            $('#schedulePanel').toggleClass('active');
+            $('#panelOverlay').toggleClass('active');
+        });
+        
+        $('#panelOverlay').on('click', e=>{
+            $('#schedulePanel').removeClass('active');
+            $('#panelOverlay').removeClass('active');
+        });
+        
+        $(document).on('click', e=>{
+            if(!$(e.target).closest('#schedulePanel,#toggleArrow').length){
+                $('#schedulePanel').removeClass('active');
+                $('#panelOverlay').removeClass('active');
+            }
+        });
+        
+        /* Funciones para segundo plano */
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) {
+                console.log('Wake Lock no disponible');
+            }
+        }
 
-  -webkit-border-top-left-radius: 0px;
-  -webkit-border-top-right-radius: 0px;
-  -webkit-border-bottom-right-radius: 0px;
-  -webkit-border-bottom-left-radius: 0px;
-  -moz-border-radius-topleft: 0px;
-  -moz-border-radius-topright: 0px;
-  -moz-border-radius-bottomright: 0px;
-  -moz-border-radius-bottomleft: 0px;
+        function releaseWakeLock() {
+            if (wakeLock) {
+                wakeLock.release();
+                wakeLock = null;
+            }
+        }
 
+        function initAudioContext() {
+            try {
+                window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!audioContext) {
+                    audioContext = new AudioContext();
+                }
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+            } catch (err) {
+                console.log('AudioContext no disponible');
+            }
+        }
 
-  border-top-left-radius: 0px;
-  border-top-right-radius: 0px;
-  border-bottom-right-radius: 0px;
-  border-bottom-left-radius: 0px;
-  border: none;'>
-<div <a href="RADIO PRO" title="RADIO PRO"></a><a href="CHAN" title="SEOMARCA"></a></div>
+        function setupMediaSession() {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: 'STEREO REVELACIÓN RADIO',
+                    artist: 'En Vivo',
+                    album: 'Radio Stream',
+                    artwork: [
+                        { src: 'https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png', sizes: '96x96', type: 'image/png' },
+                        { src: 'https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png', sizes: '128x128', type: 'image/png' },
+                        { src: 'https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png', sizes: '192x192', type: 'image/png' },
+                        { src: 'https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png', sizes: '256x256', type: 'image/png' },
+                        { src: 'https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png', sizes: '384x384', type: 'image/png' },
+                        { src: 'https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png', sizes: '512x512', type: 'image/png' }
+                    ]
+                });
+                navigator.mediaSession.playbackState = isConnected ? 'playing' : 'paused';
+                
+                // Controles de media
+                navigator.mediaSession.setActionHandler('play', () => {
+                    // Reactivar reproducción si está pausada
+                    const playButton = document.querySelector('[data-lunaradio="play"]');
+                    if (playButton) playButton.click();
+                });
+                
+                navigator.mediaSession.setActionHandler('pause', () => {
+                    // Pausar reproducción
+                    const stopButton = document.querySelector('[data-lunaradio="stop"]');
+                    if (stopButton) stopButton.click();
+                });
+            }
+        }
 
+        function showBackgroundNotification() {
+            const notification = $('#backgroundNotification');
+            notification.addClass('show');
+            
+            setTimeout(() => {
+                notification.removeClass('show').addClass('hide');
+                setTimeout(() => {
+                    notification.removeClass('hide');
+                }, 300);
+            }, 3000);
+        }
 
+        /* PWA Functions */
+        function showInstallBanner() {
+            const banner = $('#installBanner');
+            const hasShownBanner = localStorage.getItem('pwa-banner-shown');
+            
+            if (!hasShownBanner && deferredPrompt) {
+                banner.addClass('show');
+                localStorage.setItem('pwa-banner-shown', 'true');
+            }
+        }
 
-<div id="lunaradio" style="width:100%; height:800px;"></div>
+        function hideInstallBanner() {
+            $('#installBanner').removeClass('show');
+        }
 
+        async function installPWA() {
+            if (deferredPrompt) {
+                const choiceResult = await deferredPrompt.prompt();
+                console.log('Usuario eligió:', choiceResult.outcome);
+                deferredPrompt = null;
+                hideInstallBanner();
+            }
+        }
 
-<script type="3bc5e4e5245e387f3290c38f-text/javascript">
-$("#lunaradio").lunaradio({
+        // Event listeners para PWA
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Mostrar banner después de 5 segundos
+            setTimeout(showInstallBanner, 5000);
+        });
 
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA instalada exitosamente');
+            hideInstallBanner();
+            deferredPrompt = null;
+        });
 
+        // Event listeners para banner
+        $('#installBanner').on('click', function(e) {
+            if (!e.target.classList.contains('close-btn')) {
+                installPWA();
+            }
+        });
 
-	userinterface: "big",
-	backgroundcolor: "#000000",
-	fontcolor: "#FFFFFF",
-	hightlightcolor: "#FFE000",
-	fontname: "Saira Condensed",
-	googlefont: "Saira+Condensed:wght@100",
-	fontratio: "0.3",
-	radioname: "STEREO REVELACIÓN RADIO",
-	scroll: "true",
-	coverimage: "https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png",
-  onlycoverimage: "true",
-  usevisualizer: "fake",
-	coverstyle: "animated",
-	visualizertype: "4",
-	multicolorvisualizer: "true",
-    color1: "#FF0000",
-    color2: "FF0000",
-    color3: "#e6f62f",
-    color4: "#e6f62f",
-	itunestoken: "1000lIPN",
-	metadatatechnic: "sonic_title",
-	ownmetadataurl: "sonic_title",
-	streamurl: "https://cast6.my-control-panel.com/proxy/manrique/",
-	streamtype: "shoutcast2",
-	icecastmountpoint: "/radio.mp3",
-	radionomyid: "",
-	radionomyapikey: "",
-	radiozenoid: "utztqpdbt0hvv",
-	radiojarid: "",
-	radiocoid: "",
-	shoutcastpath: "/stream",
-	shoutcastid: "1",
-	streamprefix: "Ahora",
-	streamsuffix: "Sonando",
-	metadatainterval: "20000",
-	volume: "90",
-	debug: "false",
-	usestreamcorsproxy: "false",
-	corsproxy: "https://corsradio.herokuapp.com/index.php?q=",
-	autoplay:"true",
-});
-</script>
+        $('#closeBanner').on('click', function(e) {
+            e.stopPropagation();
+            hideInstallBanner();
+        });
 
-<center>
-<table>
-  <tr>
-    <td><a href="https://www.facebook.com/profile.php?id=100067028263478" target="_blank"><img src="https://stereorevelacionradio.com/wp-content/uploads/2023/05/face-150x150.png" alt="Sígueme en Facebook" width="50" height="50" style="padding: 20px;"></a></td>
-    <td><a href="https://api.whatsapp.com/send?phone=51931093417" target="_blank"><img src="https://stereorevelacionradio.com/wp-content/uploads/2023/05/whstsapp-150x150.png" alt="Enviar Whatsapp" width="50" height="50" style="padding: 20px;"></a></td>
-    <td><a href="https://www.youtube.com/@stereorevelacionradio" target="_blank"><img src="https://stereorevelacionradio.com/wp-content/uploads/2023/05/yt-150x150.png" alt="Sígueme en Youtube" width="50" height="50" style="padding: 20px;"></a></td>
-    <td><a href="https://www.stereorevelacionradio.com" target="_blank"><img src="https://stereorevelacionradio.com/wp-content/uploads/2023/05/pagina-150x150.png" alt="Sígueme en Twitter" width="50" height="50" style="padding: 20px;"></a></td>
-  </tr>
-</table>
-</center>
+        // Registrar Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then((registration) => {
+                        console.log('SW registrado exitosamente:', registration);
+                    })
+                    .catch((registrationError) => {
+                        console.log('SW falló al registrarse:', registrationError);
+                    });
+            });
+        }
 
-<script src="https://ajax.cloudflare.com/cdn-cgi/scripts/7089c43e/cloudflare-static/rocket-loader.min.js" data-cf-settings="3bc5e4e5245e387f3290c38f-|49" defer></script>
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && isConnected) {
+                showBackgroundNotification();
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+            }
+        });
+
+        document.addEventListener('touchstart', () => { initAudioContext(); }, { once: true });
+        document.addEventListener('click', () => { initAudioContext(); }, { once: true });
+        
+        /* Inicializar reproductor */
+        $(document).ready(function() {
+            $("#extassisnetwork").lunaradio({
+                streamurl: "https://cast6.my-control-panel.com/proxy/manrique/",
+                radioname: "STEREO REVELACIÓN RADIO",
+                coverimage: "https://stereorevelacionradio.com/wp-content/uploads/2022/12/logo-radio.png",
+                onlycoverimage: false,
+                userinterface: "big",
+                backgroundcolor: "#1a0d2e",
+                fontcolor: "#FFFFFF",
+                hightlightcolor: "#FFE000",
+                fontname: "Segoe UI",
+                scroll: "true",
+                coverstyle: "animated",
+                usevisualizer: "real",
+                visualizertype: "6",
+                multicolorvisualizer: "true",
+                color1: "#FF6B35",
+                color2: "#F7931E", 
+                color3: "#FFD700",
+                color4: "#32CD32",
+                color5: "#00CED1",
+                color6: "#9A4FD4",
+                visualizercolor: "#FFE000",
+                streamtype: "shoutcast2",
+                shoutcastpath: "/stream",
+                shoutcastid: "1",
+                volume: "90",
+                autoplay: "true",
+                usestreamcorsproxy: "true",
+                
+                onPlay: function() {
+                    isConnected = true;
+                    initAudioContext();
+                    setupMediaSession();
+                    requestWakeLock();
+                },
+                onStop: function() {
+                    isConnected = false;
+                    releaseWakeLock();
+                    if ('mediaSession' in navigator) {
+                        navigator.mediaSession.playbackState = 'paused';
+                    }
+                },
+                onError: function() {
+                    isConnected = false;
+                    releaseWakeLock();
+                    if ('mediaSession' in navigator) {
+                        navigator.mediaSession.playbackState = 'paused';
+                    }
+                }
+            });
+        });
+        
+        // Bloquear F12 y clic derecho
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'F12') {
+                event.preventDefault();
+            }
+        });
+
+        document.addEventListener('contextmenu', function(event) {
+            event.preventDefault();
+        });
+
+        // Mantener contexto activo
+        setInterval(() => {
+            if (isConnected && audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }, 30000);
+
+        window.addEventListener('beforeunload', () => { releaseWakeLock(); });
+        window.addEventListener('focus', () => {
+            if (isConnected && audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        });
+    </script>
 </body>
+</html>
