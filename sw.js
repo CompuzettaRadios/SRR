@@ -1,8 +1,8 @@
-const CACHE_NAME = 'stereo-revelacion-v1.5';
+const CACHE_NAME = 'stereo-revelacion-v1.4';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
+  '/SRR/',
+  '/SRR/index.html',
+  '/SRR/manifest.json',
   'https://code.jquery.com/jquery-3.2.1.min.js',
   'https://extassisnetwork.com/player/Luna/luna.js',
   'https://stereorevelacionradio.com/wp-content/uploads/2023/05/face-150x150.png',
@@ -75,9 +75,10 @@ self.addEventListener('fetch', function(event) {
           return response;
         }
 
-        // Si es la ruta principal y no está en cache, buscar index.html
-        if (event.request.url === self.location.origin + '/' || 
-            event.request.url.endsWith('/')) {
+// Si es la ruta principal y no está en cache, buscar index.html
+if (event.request.url === self.location.origin + '/SRR/' || 
+    event.request.url.endsWith('/SRR/') || 
+    event.request.url === self.location.origin + '/') {
           return caches.match('/index.html').then(function(indexResponse) {
             if (indexResponse) {
               return indexResponse;
