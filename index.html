@@ -282,26 +282,28 @@
         }
 
         /* Notificación de instalación PWA */
-        .install-banner {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #FFE000 0%, #FFA500 100%);
-            color: #000;
-            padding: 15px 25px;
-            border-radius: 25px;
-            font-size: 14px;
-            font-weight: 600;
-            z-index: 10000;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 224, 0, 0.5);
-            box-shadow: 0 4px 20px rgba(255, 224, 0, 0.4);
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
+.install-banner {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #FFE000 0%, #FFA500 100%);
+    color: #000;
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 10000;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 224, 0, 0.5);
+    box-shadow: 0 4px 20px rgba(255, 224, 0, 0.4);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    max-width: 90%;
+    text-align: center;
+}
 
         .install-banner.show {
             opacity: 1;
@@ -490,7 +492,7 @@
         /* PWA Functions */
         function showInstallBanner() {
             const banner = $('#installBanner');
-            const hasShownBanner = false;
+            const hasShownBanner = localStorage.getItem('pwa-banner-shown') === 'true';
             
             if (!hasShownBanner && deferredPrompt) {
                 banner.addClass('show');
