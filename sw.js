@@ -1,6 +1,7 @@
-const CACHE_NAME = 'stereo-revelacion-v1.3';
+const CACHE_NAME = 'stereo-revelacion-v1.4';
 const urlsToCache = [
   '/',
+  '/index.html',
   '/manifest.json',
   'https://code.jquery.com/jquery-3.2.1.min.js',
   'https://extassisnetwork.com/player/Luna/luna.js',
