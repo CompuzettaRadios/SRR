@@ -1,9 +1,7 @@
-const CACHE_NAME = 'stereo-revelacion-v1';
+const CACHE_NAME = 'stereo-revelacion-v1.1';
 const urlsToCache = [
   '/',
   '/manifest.json',
-  'https://code.jquery.com/jquery-3.2.1.min.js',
-  'https://extassisnetwork.com/player/Luna/luna.js',
   'https://stereorevelacionradio.com/wp-content/uploads/2023/05/face-150x150.png',
   'https://stereorevelacionradio.com/wp-content/uploads/2023/05/whstsapp-150x150.png',
   'https://stereorevelacionradio.com/wp-content/uploads/2023/05/yt-150x150.png',
@@ -19,11 +17,19 @@ self.addEventListener('install', function(event) {
     caches.open(CACHE_NAME)
       .then(function(cache) {
         console.log('Cache abierto:', CACHE_NAME);
-        return cache.addAll(urlsToCache);
+        // Cachear recursos uno por uno para manejar errores individualmente
+        return Promise.allSettled(
+          urlsToCache.map(url => 
+            cache.add(url).catch(error => {
+              console.warn('No se pudo cachear:', url, error);
+              return null;
+            })
+          )
+        );
       })
       .then(function() {
-        console.log('Todos los recursos fueron cacheados');
-        return self.skipWaiting(); // Fuerza la activación inmediata
+        console.log('Proceso de cacheado completado');
+        return self.skipWaiting();
       })
       .catch(function(error) {
         console.error('Error durante la instalación:', error);
@@ -46,55 +52,123 @@ self.addEventListener('activate', function(event) {
       );
     }).then(function() {
       console.log('Service Worker activado');
-      return self.clients.claim(); // Toma control de todas las páginas
+      return self.clients.claim();
     })
   );
 });
 
 // Intercepción de requests
 self.addEventListener('fetch', function(event) {
-  // No cachear el stream de audio y recursos dinámicos
-  if (event.request.url.includes('cast6.my-control-panel.com') || 
-      event.request.url.includes('/stream') ||
-      event.request.method !== 'GET') {
-    return fetch(event.request);
+  const request = event.request;
+  const url = new URL(request.url);
+  
+  // No cachear el stream de audio, APIs dinámicas y métodos no-GET
+  if (url.hostname.includes('cast6.my-control-panel.com') || 
+      url.pathname.includes('/stream') ||
+      url.hostname.includes('extassisnetwork.com') ||
+      url.hostname.includes('code.jquery.com') ||
+      request.method !== 'GET' ||
+      url.protocol !== 'https:' && url.protocol !== 'http:') {
+    return;
   }
 
   event.respondWith(
-    caches.match(event.request)
+    caches.match(request)
       .then(function(response) {
-        // Cache hit - return response
         if (response) {
-          console.log('Sirviendo desde cache:', event.request.url);
+          console.log('Sirviendo desde cache:', request.url);
           return response;
         }
 
-        console.log('Fetching desde red:', event.request.url);
-        return fetch(event.request).then(
+        console.log('Fetching desde red:', request.url);
+        return fetch(request).then(
           function(response) {
-            // Check if we received a valid response
-            if(!response || response.status !== 200 || response.type !== 'basic') {
+            // Verificar respuesta válida
+            if (!response || response.status !== 200 || response.type !== 'basic') {
               return response;
             }
 
-            // Clone the response
-            var responseToCache = response.clone();
-            
-            caches.open(CACHE_NAME)
-              .then(function(cache) {
-                cache.put(event.request, responseToCache);
-              });
+            // Solo cachear respuestas exitosas de recursos estáticos
+            if (url.pathname.includes('.png') || 
+                url.pathname.includes('.jpg') || 
+                url.pathname.includes('.ico') ||
+                url.pathname.includes('manifest.json') ||
+                url.pathname === '/') {
+              
+              const responseToCache = response.clone();
+              
+              caches.open(CACHE_NAME)
+                .then(function(cache) {
+                  cache.put(request, responseToCache);
+                })
+                .catch(function(error) {
+                  console.warn('Error al cachear:', request.url, error);
+                });
+            }
 
             return response;
           }
         ).catch(function(error) {
-          console.error('Error en fetch:', error);
-          // Retornar una respuesta offline si está disponible
-          return caches.match('/offline.html').then(function(fallback) {
-            return fallback || new Response('Contenido no disponible offline', {
-              status: 503,
-              statusText: 'Service Unavailable'
+          console.error('Error en fetch:', request.url, error);
+          
+          // Fallback para páginas HTML
+          if (request.headers.get('accept').includes('text/html')) {
+            return new Response(`
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <meta charset="UTF-8">
+                <title>Sin conexión - STEREO REVELACIÓN RADIO</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <style>
+                  body {
+                    font-family: Arial, sans-serif;
+                    text-align: center;
+                    padding: 50px;
+                    background: linear-gradient(135deg, #1a0d2e 0%, #2d1b69 100%);
+                    color: white;
+                    margin: 0;
+                    min-height: 100vh;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                  }
+                  h1 { color: #FFE000; }
+                  .retry-btn {
+                    background: #FFE000;
+                    color: #000;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 25px;
+                    cursor: pointer;
+                    margin-top: 20px;
+                    font-weight: bold;
+                  }
+                </style>
+              </head>
+              <body>
+                <h1>🎵 STEREO REVELACIÓN RADIO</h1>
+                <p>No hay conexión a internet</p>
+                <p>Verifica tu conexión e intenta nuevamente</p>
+                <button class="retry-btn" onclick="window.location.reload()">
+                  Reintentar
+                </button>
+              </body>
+              </html>
+            `, {
+              status: 200,
+              statusText: 'OK',
+              headers: {
+                'Content-Type': 'text/html; charset=utf-8'
+              }
             });
+          }
+          
+          // Para otros recursos, devolver error
+          return new Response('Recurso no disponible offline', {
+            status: 503,
+            statusText: 'Service Unavailable'
           });
         });
       })
@@ -131,7 +205,7 @@ self.addEventListener('push', function(event) {
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
-      primaryKey: 1,
+      primaryKey: Date.now(),
       ...data
     },
     actions: [
@@ -142,12 +216,12 @@ self.addEventListener('push', function(event) {
       },
       {
         action: 'close',
-        title: 'Cerrar',
-        icon: icon
+        title: 'Cerrar'
       }
     ],
-    requireInteraction: true,
-    tag: 'stereo-revelacion-notification'
+    requireInteraction: false, // Cambiado a false para mejor UX
+    tag: 'stereo-revelacion-notification',
+    renotify: true
   };
   
   event.waitUntil(
@@ -162,46 +236,47 @@ self.addEventListener('notificationclick', function(event) {
   
   const action = event.action;
   
+  if (action === 'close') {
+    return; // Solo cerrar la notificación
+  }
+  
   event.waitUntil(
     clients.matchAll({
       type: 'window',
       includeUncontrolled: true
     }).then(function(clientList) {
-      // Si se hace click en "Abrir Radio" o en la notificación misma
-      if (action === 'open' || !action) {
-        // Buscar si ya hay una ventana abierta
-        for (let i = 0; i < clientList.length; i++) {
-          const client = clientList[i];
-          if (client.url.includes(self.location.origin) && 'focus' in client) {
-            return client.focus();
-          }
-        }
-        
-        // Si no hay ventana abierta, abrir una nueva
-        if (clients.openWindow) {
-          return clients.openWindow('/');
+      // Buscar ventana existente
+      for (let i = 0; i < clientList.length; i++) {
+        const client = clientList[i];
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          return client.focus();
         }
       }
       
-      // Si se hace click en "Cerrar", no hacer nada (la notificación ya se cerró)
-      return Promise.resolve();
+      // Abrir nueva ventana si no existe
+      if (clients.openWindow) {
+        return clients.openWindow(self.location.origin);
+      }
+    }).catch(function(error) {
+      console.error('Error al manejar click de notificación:', error);
     })
   );
 });
 
 // Manejo de cierre de notificaciones
 self.addEventListener('notificationclose', function(event) {
-  console.log('Notificación cerrada:', event);
-  // Aquí puedes agregar analytics o tracking si es necesario
+  console.log('Notificación cerrada:', event.notification.tag);
 });
 
-// Manejo de sincronización en segundo plano (opcional)
+// Manejo de sincronización en segundo plano
 self.addEventListener('sync', function(event) {
-  console.log('Background sync:', event);
+  console.log('Background sync:', event.tag);
   if (event.tag === 'background-sync') {
     event.waitUntil(
-      // Aquí puedes agregar lógica para sincronizar datos cuando se recupere la conexión
-      console.log('Sincronización en segundo plano ejecutada')
+      Promise.resolve().then(() => {
+        console.log('Sincronización en segundo plano ejecutada');
+        // Aquí puedes agregar lógica de sincronización
+      })
     );
   }
 });
@@ -211,8 +286,25 @@ self.addEventListener('error', function(event) {
   console.error('Error en Service Worker:', event.error);
 });
 
-// Manejo de errores no capturados
+// Manejo de promesas rechazadas
 self.addEventListener('unhandledrejection', function(event) {
   console.error('Promise rechazada no manejada en Service Worker:', event.reason);
   event.preventDefault();
+});
+
+// Mensaje desde el cliente principal
+self.addEventListener('message', function(event) {
+  console.log('Mensaje recibido en SW:', event.data);
+  
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+  
+  // Responder al cliente si es necesario
+  if (event.ports && event.ports[0]) {
+    event.ports[0].postMessage({
+      type: 'SW_RESPONSE',
+      message: 'Mensaje recibido correctamente'
+    });
+  }
 });
