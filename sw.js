@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stereo-revelacion-v1.4';
+const CACHE_NAME = 'stereo-revelacion-v1.5';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -75,6 +75,28 @@ self.addEventListener('fetch', function(event) {
           return response;
         }
 
+        // Si es la ruta principal y no está en cache, buscar index.html
+        if (event.request.url === self.location.origin + '/' || 
+            event.request.url.endsWith('/')) {
+          return caches.match('/index.html').then(function(indexResponse) {
+            if (indexResponse) {
+              return indexResponse;
+            }
+            // Si no hay index.html en cache, intentar fetch
+            return fetch('/index.html').then(function(fetchResponse) {
+              if (fetchResponse && fetchResponse.status === 200) {
+                // Cachear para futuras requests
+                caches.open(CACHE_NAME).then(function(cache) {
+                  cache.put('/', fetchResponse.clone());
+                  cache.put('/index.html', fetchResponse.clone());
+                });
+                return fetchResponse;
+              }
+              throw new Error('No se pudo cargar index.html');
+            });
+          });
+        }
+
         console.log('Fetching desde red:', event.request.url);
         return fetch(event.request).then(
           function(response) {
@@ -95,19 +117,16 @@ self.addEventListener('fetch', function(event) {
           }
         ).catch(function(error) {
           console.error('Error en fetch:', error);
-          // Para la página principal, devolver desde cache o respuesta básica
+          
+          // Para la página principal, devolver desde cache
           if (event.request.url === self.location.origin + '/' || 
-              event.request.url === self.location.origin + '/index.html') {
-            return caches.match('/').then(function(cachedResponse) {
-              return cachedResponse || new Response('Radio no disponible offline', {
-                status: 200,
-                statusText: 'OK',
-                headers: {'Content-Type': 'text/html'}
-              });
+              event.request.url.endsWith('/')) {
+            return caches.match('/index.html').then(function(cachedResponse) {
+              return cachedResponse || caches.match('/');
             });
           }
           
-          // Para otros recursos, intentar respuesta offline
+          // Retornar una respuesta offline si está disponible
           return caches.match('/offline.html').then(function(fallback) {
             return fallback || new Response('Contenido no disponible offline', {
               status: 503,
