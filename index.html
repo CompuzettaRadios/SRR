@@ -490,7 +490,7 @@
         /* PWA Functions */
         function showInstallBanner() {
             const banner = $('#installBanner');
-            const hasShownBanner = localStorage.getItem('pwa-banner-shown');
+            const hasShownBanner = false;
             
             if (!hasShownBanner && deferredPrompt) {
                 banner.addClass('show');
