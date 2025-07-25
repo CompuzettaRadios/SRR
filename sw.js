@@ -1,8 +1,8 @@
-const CACHE_NAME = 'stereo-revelacion-v1.4';
+const CACHE_NAME = 'stereo-revelacion-v2.0';
 const urlsToCache = [
-  '/SRR/',
-  '/SRR/index.html',
-  '/SRR/manifest.json',
+  './',
+  './index.html',
+  './manifest.json',
   'https://code.jquery.com/jquery-3.2.1.min.js',
   'https://extassisnetwork.com/player/Luna/luna.js',
   'https://stereorevelacionradio.com/wp-content/uploads/2023/05/face-150x150.png',
@@ -15,121 +15,173 @@ const urlsToCache = [
 
 // Instalación del Service Worker
 self.addEventListener('install', function(event) {
-  console.log('Service Worker instalando...');
+  console.log('[SW] Instalando Service Worker...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function(cache) {
-        console.log('Cache abierto:', CACHE_NAME);
+        console.log('[SW] Cache abierto:', CACHE_NAME);
         return cache.addAll(urlsToCache);
       })
       .then(function() {
-        console.log('Todos los recursos fueron cacheados');
-        return self.skipWaiting(); // Fuerza la activación inmediata
+        console.log('[SW] Recursos cacheados exitosamente');
+        return self.skipWaiting();
       })
       .catch(function(error) {
-        console.error('Error durante la instalación:', error);
+        console.error('[SW] Error durante instalación:', error);
       })
   );
 });
 
 // Activación del Service Worker
 self.addEventListener('activate', function(event) {
-  console.log('Service Worker activando...');
+  console.log('[SW] Activando Service Worker...');
   event.waitUntil(
     caches.keys().then(function(cacheNames) {
       return Promise.all(
         cacheNames.map(function(cacheName) {
           if (cacheName !== CACHE_NAME) {
-            console.log('Eliminando cache antiguo:', cacheName);
+            console.log('[SW] Eliminando cache antiguo:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     }).then(function() {
-      console.log('Service Worker activado');
-      return self.clients.claim(); // Toma control de todas las páginas
+      console.log('[SW] Service Worker activado exitosamente');
+      return self.clients.claim();
     })
   );
 });
 
+// Función para determinar si es una request de navegación
+function isNavigationRequest(request) {
+  return request.mode === 'navigate' || 
+         (request.method === 'GET' && request.headers.get('accept').includes('text/html'));
+}
+
+// Función para determinar si debe ser cacheado
+function shouldCache(url) {
+  // No cachear streams de audio
+  if (url.includes('cast6.my-control-panel.com') || 
+      url.includes('/stream') ||
+      url.includes('shoutcast') ||
+      url.includes('icecast')) {
+    return false;
+  }
+  
+  // No cachear APIs dinámicas
+  if (url.includes('/api/') || 
+      url.includes('php') ||
+      url.includes('ajax')) {
+    return false;
+  }
+  
+  return true;
+}
+
 // Intercepción de requests
 self.addEventListener('fetch', function(event) {
+  const request = event.request;
+  const url = new URL(request.url);
+  
+  console.log('[SW] Interceptando:', request.url);
+  
   // Solo manejar requests GET
-  if (event.request.method !== 'GET') {
+  if (request.method !== 'GET') {
+    console.log('[SW] Request no GET, pasando directo');
     return;
   }
 
-  // No cachear el stream de audio y recursos dinámicos
-  if (event.request.url.includes('cast6.my-control-panel.com') || 
-      event.request.url.includes('/stream')) {
-    event.respondWith(fetch(event.request));
+  // No interceptar streams de audio y recursos dinámicos
+  if (!shouldCache(request.url)) {
+    console.log('[SW] Recurso no cacheable, pasando directo:', request.url);
+    event.respondWith(fetch(request));
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request)
-      .then(function(response) {
-        // Cache hit - return response
-        if (response) {
-          console.log('Sirviendo desde cache:', event.request.url);
-          return response;
-        }
-
-// Si es la ruta principal y no está en cache, buscar index.html
-if (event.request.url === self.location.origin + '/SRR/' || 
-    event.request.url.endsWith('/SRR/') || 
-    event.request.url === self.location.origin + '/') {
-          return caches.match('/index.html').then(function(indexResponse) {
-            if (indexResponse) {
-              return indexResponse;
-            }
-            // Si no hay index.html en cache, intentar fetch
-            return fetch('/index.html').then(function(fetchResponse) {
-              if (fetchResponse && fetchResponse.status === 200) {
-                // Cachear para futuras requests
-                caches.open(CACHE_NAME).then(function(cache) {
-                  cache.put('/', fetchResponse.clone());
-                  cache.put('/index.html', fetchResponse.clone());
-                });
-                return fetchResponse;
-              }
-              throw new Error('No se pudo cargar index.html');
-            });
-          });
-        }
-
-        console.log('Fetching desde red:', event.request.url);
-        return fetch(event.request).then(
-          function(response) {
-            // Check if we received a valid response
-            if(!response || response.status !== 200 || response.type !== 'basic') {
+  // Manejar requests de navegación (páginas HTML)
+  if (isNavigationRequest(request)) {
+    console.log('[SW] Request de navegación detectada');
+    event.respondWith(
+      caches.match('./index.html')
+        .then(function(cachedResponse) {
+          if (cachedResponse) {
+            console.log('[SW] Sirviendo index.html desde cache');
+            return cachedResponse;
+          }
+          
+          console.log('[SW] Fetching index.html desde red');
+          return fetch('./index.html').then(function(response) {
+            if (response && response.status === 200) {
+              // Cachear para futuras requests
+              caches.open(CACHE_NAME).then(function(cache) {
+                cache.put('./index.html', response.clone());
+              });
               return response;
             }
+            throw new Error('No se pudo cargar index.html');
+          });
+        })
+        .catch(function(error) {
+          console.error('[SW] Error cargando página:', error);
+          return new Response(
+            `<!DOCTYPE html>
+            <html>
+            <head>
+              <title>STEREO REVELACIÓN RADIO - Offline</title>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <style>
+                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #1a0d2e; color: #fff; }
+                h1 { color: #FFE000; }
+              </style>
+            </head>
+            <body>
+              <h1>STEREO REVELACIÓN RADIO</h1>
+              <p>No hay conexión a internet. La aplicación se cargará cuando se restablezca la conexión.</p>
+              <button onclick="window.location.reload()">Intentar de nuevo</button>
+            </body>
+            </html>`,
+            {
+              status: 200,
+              statusText: 'OK',
+              headers: { 'Content-Type': 'text/html' }
+            }
+          );
+        })
+    );
+    return;
+  }
 
-            // Clone the response
-            var responseToCache = response.clone();
-            
-            caches.open(CACHE_NAME)
-              .then(function(cache) {
-                cache.put(event.request, responseToCache);
-              });
+  // Manejar otros recursos (CSS, JS, imágenes)
+  event.respondWith(
+    caches.match(request)
+      .then(function(cachedResponse) {
+        if (cachedResponse) {
+          console.log('[SW] Sirviendo desde cache:', request.url);
+          return cachedResponse;
+        }
 
+        console.log('[SW] Fetching desde red:', request.url);
+        return fetch(request).then(function(response) {
+          // Verificar si es una respuesta válida
+          if (!response || response.status !== 200 || response.type !== 'basic') {
             return response;
           }
-        ).catch(function(error) {
-          console.error('Error en fetch:', error);
+
+          // Clonar respuesta para cache
+          const responseToCache = response.clone();
           
-          // Para la página principal, devolver desde cache
-          if (event.request.url === self.location.origin + '/' || 
-              event.request.url.endsWith('/')) {
-            return caches.match('/index.html').then(function(cachedResponse) {
-              return cachedResponse || caches.match('/');
-            });
-          }
+          caches.open(CACHE_NAME).then(function(cache) {
+            cache.put(request, responseToCache);
+          });
+
+          return response;
+        }).catch(function(error) {
+          console.error('[SW] Error en fetch:', error);
           
-          // Retornar una respuesta offline si está disponible
-          return caches.match('/offline.html').then(function(fallback) {
-            return fallback || new Response('Contenido no disponible offline', {
+          // Para recursos estáticos, intentar servir desde cache
+          return caches.match(request).then(function(fallback) {
+            return fallback || new Response('Recurso no disponible offline', {
               status: 503,
               statusText: 'Service Unavailable'
             });
@@ -141,7 +193,7 @@ if (event.request.url === self.location.origin + '/SRR/' ||
 
 // Manejo de notificaciones push
 self.addEventListener('push', function(event) {
-  console.log('Push recibido:', event);
+  console.log('[SW] Push recibido:', event);
   
   let title = 'STEREO REVELACIÓN RADIO';
   let body = 'Nueva notificación de la radio';
@@ -184,7 +236,7 @@ self.addEventListener('push', function(event) {
         icon: icon
       }
     ],
-    requireInteraction: true,
+    requireInteraction: false,
     tag: 'stereo-revelacion-notification'
   };
   
@@ -195,7 +247,7 @@ self.addEventListener('push', function(event) {
 
 // Manejo de clicks en notificaciones
 self.addEventListener('notificationclick', function(event) {
-  console.log('Notificación clickeada:', event);
+  console.log('[SW] Notificación clickeada:', event);
   event.notification.close();
   
   const action = event.action;
@@ -205,9 +257,8 @@ self.addEventListener('notificationclick', function(event) {
       type: 'window',
       includeUncontrolled: true
     }).then(function(clientList) {
-      // Si se hace click en "Abrir Radio" o en la notificación misma
       if (action === 'open' || !action) {
-        // Buscar si ya hay una ventana abierta
+        // Buscar ventana existente
         for (let i = 0; i < clientList.length; i++) {
           const client = clientList[i];
           if (client.url.includes(self.location.origin) && 'focus' in client) {
@@ -215,13 +266,12 @@ self.addEventListener('notificationclick', function(event) {
           }
         }
         
-        // Si no hay ventana abierta, abrir una nueva
+        // Abrir nueva ventana
         if (clients.openWindow) {
-          return clients.openWindow('/');
+          return clients.openWindow('./');
         }
       }
       
-      // Si se hace click en "Cerrar", no hacer nada (la notificación ya se cerró)
       return Promise.resolve();
     })
   );
@@ -229,28 +279,15 @@ self.addEventListener('notificationclick', function(event) {
 
 // Manejo de cierre de notificaciones
 self.addEventListener('notificationclose', function(event) {
-  console.log('Notificación cerrada:', event);
-  // Aquí puedes agregar analytics o tracking si es necesario
-});
-
-// Manejo de sincronización en segundo plano (opcional)
-self.addEventListener('sync', function(event) {
-  console.log('Background sync:', event);
-  if (event.tag === 'background-sync') {
-    event.waitUntil(
-      // Aquí puedes agregar lógica para sincronizar datos cuando se recupere la conexión
-      console.log('Sincronización en segundo plano ejecutada')
-    );
-  }
+  console.log('[SW] Notificación cerrada:', event);
 });
 
 // Manejo de errores
 self.addEventListener('error', function(event) {
-  console.error('Error en Service Worker:', event.error);
+  console.error('[SW] Error:', event.error);
 });
 
-// Manejo de errores no capturados
 self.addEventListener('unhandledrejection', function(event) {
-  console.error('Promise rechazada no manejada en Service Worker:', event.reason);
+  console.error('[SW] Promise rechazada:', event.reason);
   event.preventDefault();
 });
