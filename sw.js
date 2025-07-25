@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stereo-revelacion-v1.1';
+const CACHE_NAME = 'stereo-revelacion-v1.2';
 const urlsToCache = [
   '/',
   '/manifest.json',
