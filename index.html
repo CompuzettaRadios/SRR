@@ -135,13 +135,6 @@
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
         }
 
-        .album-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 20px;
-        }
-
         .default-logo {
             font-size: 4rem;
             font-weight: 800;
@@ -150,8 +143,7 @@
             transition: transform 0.3s ease;
         }
 
-        .album-cover.playing .default-logo,
-        .album-cover.playing .album-image {
+        .album-cover.playing .default-logo {
             animation: rotate 10s linear infinite;
         }
 
@@ -324,71 +316,7 @@
             font-weight: 600;
         }
 
-        /* History Section Styles */
-        .history-container {
-            padding: 30px;
-            height: 100%;
-            overflow-y: auto;
-        }
 
-        .history-header {
-            color: white;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .history-title {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .history-subtitle {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 1rem;
-        }
-
-        .history-list {
-            space-y: 15px;
-        }
-
-        .history-item {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .history-item:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-2px);
-        }
-
-        .history-time {
-            color: #667eea;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .history-song {
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .history-artist {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9rem;
-        }
 
         /* Loading states */
         .loading {
@@ -438,33 +366,10 @@
                 width: 150px;
             }
 
-            .history-container {
-                padding: 20px;
-            }
 
-            .history-title {
-                font-size: 1.5rem;
-            }
         }
 
-        /* Scrollbar styling */
-        .history-container::-webkit-scrollbar {
-            width: 8px;
-        }
 
-        .history-container::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-
-        .history-container::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 4px;
-        }
-
-        .history-container::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #764ba2, #667eea);
-        }
     </style>
 </head>
 <body>
@@ -487,8 +392,7 @@
                 <!-- Album Cover -->
                 <div class="album-container">
                     <div class="album-cover" id="albumCover">
-                        <img src="https://stereorevelacionradio.com/wp-content/uploads/2022/12/cropped-logo-radio.png" alt="Stereo Revelación Radio" class="album-image" style="display: none;" id="albumImage">
-                        <div class="default-logo" id="defaultLogo">SR</div>
+                        <div class="default-logo">SR</div>
                     </div>
                     <div class="reflection"></div>
                 </div>
@@ -557,67 +461,32 @@
         <div class="history-section">
             <iframe src="https://compuzettaradios.github.io/reproductor/historial.html" style="width: 100%; height: 100%; border: none; background: transparent;"></iframe>
         </div>
+    </div>
 
     <!-- Audio Element -->
-    <audio id="radioStream" preload="none" crossorigin="anonymous"></audio>
+    <audio id="radioStream" preload="none"></audio>
 
     <script>
         class RadioPlayer {
-
-constructor() {
-    this.audio = document.getElementById('radioStream');
-    this.isPlaying = false;
-    this.currentVolume = 70;
-    
-    // URLs corregidas que funcionan
-    this.streamUrls = [
-        'https://cast6.my-control-panel.com/proxy/manrique/stream',
-        'http://cast6.my-control-panel.com/proxy/manrique/stream',
-        'https://cast6.my-control-panel.com/proxy/manrique/',
-        'http://cast6.my-control-panel.com/proxy/manrique/'
-    ];
-    this.currentStreamIndex = 0;
-    this.statsUrl = 'https://cast6.my-control-panel.com/proxy/manrique/stats?json=1';
-    this.logoUrl = 'https://stereorevelacionradio.com/wp-content/uploads/2022/12/cropped-logo-radio.png';
-    
-    this.updateInterval = null;
-    this.historyData = [];
-    this.retryCount = 0;
-    this.maxRetries = this.streamUrls.length;
-    this.playPromise = null;
-    
-    this.initializePlayer();
-    this.bindEvents();
-    // Quitar estas líneas que causan error:
-    // this.loadHistory();
-    // this.startHistoryUpdates();
-    this.loadStationLogo();
-}
+            constructor() {
+                this.audio = document.getElementById('radioStream');
+                this.isPlaying = false;
+                this.currentVolume = 70;
+                // URL de stream que debería funcionar (usando HTTP en lugar de HTTPS si hay problemas de SSL)
+                this.streamUrl = 'https://streaming.stereorevelacionradio.com:8000/stereo';
+                this.fallbackStreamUrl = 'http://streaming.stereorevelacionradio.com:8000/stereo';
+                this.updateInterval = null;
+                
+                this.initializePlayer();
+                this.bindEvents();
+            }
 
             initializePlayer() {
                 this.audio.volume = this.currentVolume / 100;
                 document.getElementById('volumeSlider').value = this.currentVolume;
                 
-                // Configurar el audio para streaming
-                this.audio.crossOrigin = "anonymous";
-                this.audio.preload = "none";
-            }
-
-            loadStationLogo() {
-                const albumImage = document.getElementById('albumImage');
-                const defaultLogo = document.getElementById('defaultLogo');
-                
-                albumImage.onload = () => {
-                    albumImage.style.display = 'block';
-                    defaultLogo.style.display = 'none';
-                };
-                
-                albumImage.onerror = () => {
-                    albumImage.style.display = 'none';
-                    defaultLogo.style.display = 'block';
-                };
-                
-                albumImage.src = this.logoUrl;
+                // Preload with silent MP3 to enable autoplay on some browsers
+                this.audio.src = 'data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAATPAAAA6AADeugAAPeiAAEMAAAABAAA=';
             }
 
             bindEvents() {
@@ -635,26 +504,9 @@ constructor() {
                 // Audio events
                 this.audio.addEventListener('playing', () => this.onPlaying());
                 this.audio.addEventListener('pause', () => this.onPause());
-                this.audio.addEventListener('error', (e) => this.onError(e));
+                this.audio.addEventListener('error', () => this.onError());
                 this.audio.addEventListener('waiting', () => this.onBuffering());
                 this.audio.addEventListener('canplay', () => this.onCanPlay());
-                this.audio.addEventListener('loadstart', () => this.onLoadStart());
-                this.audio.addEventListener('ended', () => this.onEnded());
-                
-                // User interaction for autoplay policy
-                document.addEventListener('click', () => this.enableAutoplay(), { once: true });
-                document.addEventListener('touchstart', () => this.enableAutoplay(), { once: true });
-            }
-
-            enableAutoplay() {
-                // Prepare for autoplay by loading silent audio
-                this.audio.volume = 0;
-                this.audio.play().then(() => {
-                    this.audio.pause();
-                    this.audio.volume = this.currentVolume / 100;
-                }).catch(() => {
-                    // Autoplay still blocked
-                });
             }
 
             async togglePlay() {
@@ -666,81 +518,36 @@ constructor() {
                     }
                 } catch (error) {
                     console.error('Error al reproducir:', error);
-                    this.onError(error);
+                    this.onError();
                 }
             }
 
             async play() {
                 this.updateStatus('Conectando...', 'loading');
-                this.retryCount = 0;
-                await this.tryPlay();
+                
+                try {
+                    // Try HTTPS first, then HTTP fallback
+                    this.audio.src = this.streamUrl + '?t=' + Date.now();
+                    await this.audio.play();
+                } catch (error) {
+                    console.log('HTTPS failed, trying HTTP fallback...');
+                    try {
+                        this.audio.src = this.fallbackStreamUrl + '?t=' + Date.now();
+                        await this.audio.play();
+                    } catch (fallbackError) {
+                        throw fallbackError;
+                    }
+                }
             }
 
-            async tryPlay() {
-    try {
-        // Cancelar cualquier reproducción anterior
-        if (this.playPromise) {
-            try {
-                await this.playPromise;
-            } catch (e) {
-                // Ignorar errores de promesas anteriores
+            pause() {
+                this.audio.pause();
+                this.audio.src = '';
+                this.isPlaying = false;
+                this.updatePlayButton(true);
+                this.updateStatus('Detenido', 'stopped');
+                document.getElementById('albumCover').classList.remove('playing');
             }
-        }
-        
-        this.audio.pause();
-        this.audio.currentTime = 0;
-        
-        // Usar diferentes URLs según el intento
-        const streamUrl = this.streamUrls[this.retryCount % this.streamUrls.length];
-        console.log(`Intentando con URL ${this.retryCount + 1}: ${streamUrl}`);
-        
-        // Configurar el stream
-        this.audio.src = streamUrl + (streamUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
-        this.audio.load();
-        
-        // Esperar un momento antes de reproducir
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Intentar reproducir
-        this.playPromise = this.audio.play();
-        await this.playPromise;
-        this.playPromise = null;
-        
-    } catch (error) {
-        this.playPromise = null;
-        console.log(`Intento ${this.retryCount + 1} falló con ${this.streamUrls[this.retryCount % this.streamUrls.length]}:`, error.message);
-        
-        if (this.retryCount < this.maxRetries - 1) {
-            this.retryCount++;
-            // Esperar más tiempo entre intentos
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            await this.tryPlay();
-        } else {
-            // Todos los intentos fallaron
-            throw new Error('No se pudo conectar con ningún servidor de streaming');
-        }
-    }
-}
-
-// Reemplaza el método pause() para evitar conflictos
-pause() {
-    if (this.playPromise) {
-        this.playPromise.then(() => {
-            this.audio.pause();
-        }).catch(() => {
-            this.audio.pause();
-        });
-        this.playPromise = null;
-    } else {
-        this.audio.pause();
-    }
-    
-    this.audio.src = '';
-    this.isPlaying = false;
-    this.updatePlayButton(true);
-    this.updateStatus('Detenido', 'stopped');
-    document.getElementById('albumCover').classList.remove('playing');
-}
 
             setVolume(value) {
                 this.currentVolume = parseInt(value);
@@ -774,18 +581,12 @@ pause() {
             }
 
             // Event handlers
-            onLoadStart() {
-                this.updateStatus('Cargando...', 'loading');
-            }
-
             onPlaying() {
                 this.isPlaying = true;
-                this.retryCount = 0;
                 this.updatePlayButton(false);
                 this.updateStatus('EN VIVO', 'playing');
                 document.getElementById('albumCover').classList.add('playing');
                 this.showMessage('¡Reproduciendo en vivo!');
-                this.startMetadataUpdates();
             }
 
             onPause() {
@@ -793,7 +594,6 @@ pause() {
                 this.updatePlayButton(true);
                 this.updateStatus('Pausado', 'paused');
                 document.getElementById('albumCover').classList.remove('playing');
-                this.stopMetadataUpdates();
             }
 
             onBuffering() {
@@ -806,43 +606,12 @@ pause() {
                 }
             }
 
-            onEnded() {
-                // El stream no debería terminar, pero si ocurre, reintentamos
-                if (this.isPlaying) {
-                    this.showMessage('Reconectando...', 'info');
-                    setTimeout(() => this.play(), 2000);
-                }
-            }
-
-            onError(error) {
-                console.error('Error de audio:', error);
+            onError() {
                 this.isPlaying = false;
                 this.updatePlayButton(true);
                 this.updateStatus('Error de conexión', 'error');
                 document.getElementById('albumCover').classList.remove('playing');
-                
-                let errorMessage = 'Error de conexión. ';
-                
-                if (error.target && error.target.error) {
-                    switch (error.target.error.code) {
-                        case error.target.error.MEDIA_ERR_NETWORK:
-                            errorMessage += 'Problema de red.';
-                            break;
-                        case error.target.error.MEDIA_ERR_DECODE:
-                            errorMessage += 'Error de decodificación.';
-                            break;
-                        case error.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
-                            errorMessage += 'Formato no soportado.';
-                            break;
-                        default:
-                            errorMessage += 'Error desconocido.';
-                    }
-                } else {
-                    errorMessage += 'Verifica tu conexión a internet.';
-                }
-                
-                this.showMessage(errorMessage, 'error');
-                this.stopMetadataUpdates();
+                this.showMessage('Error de conexión. Verifica tu internet.', 'error');
             }
 
             updatePlayButton(showPlay) {
@@ -864,221 +633,105 @@ pause() {
                 
                 statusText.textContent = text;
                 
-
-const colors = {
-                playing: '#27ae60',
-                loading: '#f39c12',
-                error: '#e74c3c',
-                stopped: '#95a5a6',
-                paused: '#3498db'
-            };
-            
-            statusDot.style.background = colors[type] || colors.stopped;
-        }
-
-        startMetadataUpdates() {
-            this.stopMetadataUpdates();
-            this.updateInterval = setInterval(() => {
-                this.fetchCurrentSong();
-            }, 10000); // Actualizar cada 10 segundos
-            
-            // Actualizar inmediatamente
-            this.fetchCurrentSong();
-        }
-
-        stopMetadataUpdates() {
-            if (this.updateInterval) {
-                clearInterval(this.updateInterval);
-                this.updateInterval = null;
-            }
-        }
-
-        async fetchCurrentSong() {
-            try {
-                const response = await fetch(this.statsUrl);
-                const data = await response.json();
+                const colors = {
+                    playing: '#27ae60',
+                    loading: '#f39c12',
+                    error: '#e74c3c',
+                    stopped: '#95a5a6',
+                    paused: '#95a5a6'
+                };
                 
-                if (data && data.songtitle) {
-                    this.updateNowPlaying(data.songtitle);
-                }
-            } catch (error) {
-                console.log('No se pudo obtener información de la canción actual');
+                statusDot.style.background = colors[type] || colors.playing;
             }
-        }
 
-        updateNowPlaying(songInfo) {
-            const parts = songInfo.split(' - ');
-            const songTitle = document.getElementById('songTitle');
-            const artistName = document.getElementById('artistName');
-            
-            if (parts.length >= 2) {
-                artistName.textContent = parts[0];
-                songTitle.textContent = parts[1];
-            } else {
-                songTitle.textContent = songInfo || 'Música Cristiana 24/7';
-                artistName.textContent = 'Stereo Revelación Radio';
-            }
-        }
-
-        async loadHistory() {
-            try {
-                const response = await fetch(this.historyUrl);
-                const text = await response.text();
-                this.parseHistoryData(text);
-            } catch (error) {
-                console.log('No se pudo cargar el historial musical');
-                this.showDefaultHistory();
-            }
-        }
-
-        parseHistoryData(htmlText) {
-            // Crear un elemento temporal para parsear el HTML
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(htmlText, 'text/html');
-            
-            // Buscar las filas de la tabla
-            const rows = doc.querySelectorAll('tr');
-            const history = [];
-            
-            rows.forEach((row, index) => {
-                if (index === 0) return; // Saltar encabezado
+            showMessage(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = 'toast show';
+                toast.textContent = message;
                 
-                const cells = row.querySelectorAll('td');
-                if (cells.length >= 2) {
-                    const time = cells[0].textContent.trim();
-                    const song = cells[1].textContent.trim();
-                    
-                    if (time && song) {
-                        history.push({
-                            time: this.formatTime(time),
-                            song: song
-                        });
-                    }
+                if (type === 'error') {
+                    toast.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
                 }
-            });
-            
-            this.historyData = history.slice(0, 20); // Mostrar últimas 20 canciones
-            this.renderHistory();
-        }
-
-        showDefaultHistory() {
-            this.historyData = [
-                {
-                    time: this.getCurrentTime(),
-                    song: 'Música Cristiana - Stereo Revelación Radio'
-                }
-            ];
-            this.renderHistory();
-        }
-
-        formatTime(timeString) {
-            // Convertir el tiempo del servidor al formato local
-            try {
-                const date = new Date(timeString);
-                return date.toLocaleTimeString('es-ES', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-            } catch (error) {
-                return timeString;
-            }
-        }
-
-        getCurrentTime() {
-            return new Date().toLocaleTimeString('es-ES', {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
-        renderHistory() {
-            const historyList = document.getElementById('historyList');
-            
-            if (this.historyData.length === 0) {
-                historyList.innerHTML = `
-                    <div class="history-item">
-                        <div class="history-time">${this.getCurrentTime()}</div>
-                        <div class="history-song">Música Cristiana 24/7</div>
-                        <div class="history-artist">Stereo Revelación Radio</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            historyList.innerHTML = this.historyData.map(item => {
-                const parts = item.song.split(' - ');
-                const artist = parts[0] || 'Stereo Revelación Radio';
-                const song = parts[1] || parts[0] || 'Música Cristiana';
                 
-                return `
-                    <div class="history-item">
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            // History management
+            loadHistory() {
+                // Load existing history or create sample data
+                this.historyData = this.getSampleHistory();
+                this.renderHistory();
+            }
+
+            getSampleHistory() {
+                const songs = [
+                    { title: "Sublime Gracia", artist: "Hillsong United", time: "14:32" },
+                    { title: "Reckless Love", artist: "Cory Asbury", time: "14:28" },
+                    { title: "Way Maker", artist: "Sinach", time: "14:25" },
+                    { title: "Goodness of God", artist: "Bethel Music", time: "14:21" },
+                    { title: "Great Are You Lord", artist: "All Sons & Daughters", time: "14:17" },
+                    { title: "Holy Spirit", artist: "Francesca Battistelli", time: "14:13" },
+                    { title: "Oceans", artist: "Hillsong United", time: "14:09" },
+                    { title: "Build My Life", artist: "Pat Barrett", time: "14:05" },
+                    { title: "What A Beautiful Name", artist: "Hillsong Worship", time: "14:01" },
+                    { title: "King of Kings", artist: "Hillsong Worship", time: "13:57" }
+                ];
+
+                return songs.map((song, index) => ({
+                    ...song,
+                    id: Date.now() + index,
+                    timestamp: new Date(Date.now() - (index * 4 * 60 * 1000))
+                }));
+            }
+
+            renderHistory() {
+                const historyList = document.getElementById('historyList');
+                historyList.innerHTML = '';
+
+                this.historyData.forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    historyItem.innerHTML = `
                         <div class="history-time">${item.time}</div>
-                        <div class="history-song">${song}</div>
-                        <div class="history-artist">${artist}</div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        startHistoryUpdates() {
-            // Actualizar historial cada 30 segundos
-            setInterval(() => {
-                this.loadHistory();
-            }, 30000);
-        }
-
-        showMessage(message, type = 'info') {
-            // Remover toast existente
-            const existingToast = document.querySelector('.toast');
-            if (existingToast) {
-                existingToast.remove();
+                        <div class="history-song">${item.title}</div>
+                        <div class="history-artist">${item.artist}</div>
+                    `;
+                    historyList.appendChild(historyItem);
+                });
             }
-            
-            // Crear nuevo toast
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            
-            document.body.appendChild(toast);
-            
-            // Mostrar toast
-            setTimeout(() => toast.classList.add('show'), 100);
-            
-            // Ocultar toast después de 3 segundos
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-    }
 
-    // Inicializar el reproductor cuando se carga la página
-    document.addEventListener('DOMContentLoaded', () => {
-        window.radioPlayer = new RadioPlayer();
-    });
+            addToHistory(title, artist) {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('es-ES', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
 
-    // Manejar visibilidad de la página para pausar/reanudar
-    document.addEventListener('visibilitychange', () => {
-        if (window.radioPlayer && window.radioPlayer.isPlaying) {
-            if (document.hidden) {
-                // La página está oculta, pero mantener reproduciendo
-                console.log('Página oculta, manteniendo reproducción');
-            } else {
-                // La página está visible de nuevo
-                console.log('Página visible de nuevo');
+                const newItem = {
+                    id: Date.now(),
+                    title: title,
+                    artist: artist,
+                    time: timeString,
+                    timestamp: now
+                };
+
+                this.historyData.unshift(newItem);
+                
+                // Keep only last 20 items
+                if (this.historyData.length > 20) {
+                    this.historyData = this.historyData.slice(0, 20);
+                }
+
+                this.renderHistory();
             }
-        }
-    });
 
-    // Manejar errores globales de JavaScript
-    window.addEventListener('error', (event) => {
-        console.error('Error global:', event.error);
-    });
-
-    // Manejar promesas rechazadas
-    window.addEventListener('unhandledrejection', (event) => {
-        console.error('Promesa rechazada:', event.reason);
-    });
-    </script>
-</body>
-</html>
+            startHistoryUpdates() {
+                // Simulate new songs every 3-4 minutes for demo
+                setInterval(() => {
+                    if (this.isPlaying) {
+                        const sampleSongs = [
