@@ -567,37 +567,40 @@
         document.addEventListener('touchstart', () => { initAudioContext(); }, { once: true });
         document.addEventListener('click', () => { initAudioContext(); }, { once: true });
         
-        /* Inicializar reproductor */
-        $(document).ready(function() {
-            $("#extassisnetwork").lunaradio({
-                streamurl: "https://cast6.my-control-panel.com/proxy/manrique/",
-                radioname: "STEREO REVELACIÓN RADIO",
-                coverimage: "https://stereorevelacionradio.com/wp-content/uploads/2022/12/logo-radio.png",
-                onlycoverimage: false, // ← CARATULA: false = interactivo / true solo logo
-                defaultcoverimage: "https://stereorevelacionradio.com/wp-content/uploads/2022/12/logo-radio.png", // Imagen por defecto para DJ
-                                userinterface: "big",
-                backgroundcolor: "#1a0d2e",
-                fontcolor: "#FFFFFF",
-                hightlightcolor: "#FFE000",
-                fontname: "Segoe UI",
-                scroll: "true",
-                coverstyle: "animated",
-                usevisualizer: "real",
-                visualizertype: "6",
-                multicolorvisualizer: "true",
-                color1: "#FF6B35",
-                color2: "#F7931E", 
-                color3: "#FFD700",
-                color4: "#32CD32",
-                color5: "#00CED1",
-                color6: "#9A4FD4",
-                visualizercolor: "#FFE000",
-                streamtype: "shoutcast2",
-                shoutcastpath: "/stream",
-                shoutcastid: "1",
-                volume: "90",
-                autoplay: "true",
-                usestreamcorsproxy: "true",
+/* Inicializar reproductor */
+$(document).ready(function() {
+    $("#extassisnetwork").lunaradio({
+        streamurl: "https://cast6.my-control-panel.com/proxy/manrique/",
+        radioname: "STEREO REVELACIÓN RADIO",
+        coverimage: "https://stereorevelacionradio.com/wp-content/uploads/2022/12/logo-radio.png",
+        onlycoverimage: false, // ← CARATULA: false= interactivo / true= logo
+        // NUEVOS PARÁMETROS AGREGADOS PARA SOLUCIONAR MODO DJ:
+        defaultcoverimage: "https://stereorevelacionradio.com/wp-content/uploads/2022/12/logo-radio.png", // Logo cuando no hay carátula disponible
+        unknownartisttext: "Stereo Revelación Radio", // Texto personalizado en lugar de "Unknown Artist"
+        unknowntitletext: "Transmisión en Vivo", // Texto personalizado en lugar de "Unknown Title"
+        userinterface: "big",
+        backgroundcolor: "#1a0d2e",
+        fontcolor: "#FFFFFF",
+        hightlightcolor: "#FFE000",
+        fontname: "Segoe UI",
+        scroll: "true",
+        coverstyle: "animated",
+        usevisualizer: "real",
+        visualizertype: "6",
+        multicolorvisualizer: "true",
+        color1: "#FF6B35",
+        color2: "#F7931E", 
+        color3: "#FFD700",
+        color4: "#32CD32",
+        color5: "#00CED1",
+        color6: "#9A4FD4",
+        visualizercolor: "#FFE000",
+        streamtype: "shoutcast2",
+        shoutcastpath: "/stream",
+        shoutcastid: "1",
+        volume: "90",
+        autoplay: "true",
+        usestreamcorsproxy: "true"
                 
                 onPlay: function() {
                     isConnected = true;
@@ -649,5 +652,6 @@
     </script>
 </body>
 </html>
+
 
 
