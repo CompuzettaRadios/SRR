@@ -388,10 +388,11 @@
     
     <!-- Panel lateral -->
     <div class="schedule-panel" id="schedulePanel">
-        <h3></h3>
+        <h3>🎵 Historial Musical</h3>
         <iframe class="ads-frame" 
                 id="historialFrame"
                 loading="lazy"
+                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
                 referrerpolicy="no-referrer"></iframe>
     </div>
 
@@ -582,36 +583,69 @@
         document.addEventListener('touchstart', () => { initAudioContext(); }, { once: true });
         document.addEventListener('click', () => { initAudioContext(); }, { once: true });
         
-        /* Función para cargar historial sin bucles */
+        /* Función para cargar historial - CORREGIDA */
         function loadHistorial() {
             const iframe = document.getElementById('historialFrame');
-            if (!iframe || iframe.src) return; // No recargar si ya tiene src
+            if (!iframe) return;
             
-            const historialUrl = 'https://stereorevelacionradio.com/wp-content/uploads/2025/08/logo-radio_Live.png';
+            // Si ya tiene contenido cargado, no recargar
+            if (iframe.src && iframe.src !== 'about:blank') return;
             
-            // Verificar que la URL no sea la misma que la página actual
-            if (historialUrl === window.location.href) {
-                showHistorialError(iframe);
-                return;
+            // Definir múltiples opciones de URL para el historial
+            const historialOptions = [
+                'historial.html', // Página local del historial
+                'https://your-external-historial-service.com/api', // URL externa si tienes un servicio
+                'https://example.com/some-image.png', // Como fallback una imagen
+            ];
+            
+            // Función para intentar cargar el historial
+            function tryLoadHistorial(urlIndex = 0) {
+                if (urlIndex >= historialOptions.length) {
+                    // Si todas las opciones fallan, mostrar contenido por defecto
+                    showDefaultHistorialContent(iframe);
+                    return;
+                }
+                
+                const currentUrl = historialOptions[urlIndex];
+                
+                // Verificar que no sea la misma URL que la página actual para evitar bucles
+                if (currentUrl === window.location.pathname || 
+                    currentUrl === window.location.href ||
+                    window.location.href.includes(currentUrl)) {
+                    // Si es la misma página, saltar a la siguiente opción
+                    tryLoadHistorial(urlIndex + 1);
+                    return;
+                }
+                
+                // Configurar el iframe
+                iframe.onload = function() {
+                    console.log('Historial cargado exitosamente:', currentUrl);
+                };
+                
+                iframe.onerror = function() {
+                    console.log('Error cargando:', currentUrl);
+                    tryLoadHistorial(urlIndex + 1);
+                };
+                
+                // Cargar la URL con parámetros únicos
+                const urlWithParams = currentUrl + (currentUrl.includes('?') ? '&' : '?') + 
+                                    'v=' + Date.now() + '&ref=player';
+                iframe.src = urlWithParams;
             }
             
-            // Cargar con parámetro único para evitar cache
-            iframe.src = historialUrl + '?t=' + Date.now();
-            
-            // Error handler
-            iframe.onerror = function() {
-                showHistorialError(iframe);
-            };
+            // Comenzar a intentar cargar el historial
+            tryLoadHistorial();
         }
 
-        function showHistorialError(iframe) {
+        function showDefaultHistorialContent(iframe) {
             iframe.src = `data:text/html;charset=utf-8,
                 <html>
                 <head>
                     <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1">
                     <style>
                         body {
-                            background: linear-gradient(135deg, #1a0d2e 0%, #2d1b69 50%, #16213e 100%);
+                            background: linear-gradient(135deg, #1a0d2e 0%, #2d1b69 30%, #16213e 70%, #0f1419 100%);
                             color: #fff;
                             text-align: center;
                             padding: 30px 20px;
@@ -626,26 +660,49 @@
                         h3 {
                             color: #FFE000;
                             font-size: 1.5em;
-                            margin-bottom: 15px;
-                            text-shadow: 0 0 10px rgba(255, 224, 0, 0.3);
+                            margin-bottom: 20px;
+                            text-shadow: 0 0 15px rgba(255, 224, 0, 0.5);
                         }
                         p {
                             font-size: 1em;
                             line-height: 1.6;
-                            max-width: 300px;
-                            margin: 10px auto;
+                            max-width: 280px;
+                            margin: 15px auto;
+                            opacity: 0.9;
                         }
                         .icon {
-                            font-size: 3em;
-                            margin-bottom: 20px;
+                            font-size: 4em;
+                            margin-bottom: 25px;
+                            animation: pulse 2s infinite;
+                        }
+                        @keyframes pulse {
+                            0%, 100% { transform: scale(1); }
+                            50% { transform: scale(1.1); }
+                        }
+                        .info-box {
+                            background: rgba(255, 224, 0, 0.1);
+                            border: 1px solid rgba(255, 224, 0, 0.3);
+                            border-radius: 15px;
+                            padding: 20px;
+                            margin: 20px 0;
+                            max-width: 300px;
+                        }
+                        .coming-soon {
+                            font-size: 0.9em;
+                            color: #FFE000;
+                            font-weight: 600;
+                            margin-top: 10px;
                         }
                     </style>
                 </head>
                 <body>
                     <div class="icon">🎵</div>
-                    <h3>Historial no disponible</h3>
-                    <p>El historial de música no está disponible en este momento.</p>
-                    <p><small>Inténtalo más tarde.</small></p>
+                    <h3>Historial Musical</h3>
+                    <div class="info-box">
+                        <p>El historial de canciones reproducidas estará disponible próximamente.</p>
+                        <div class="coming-soon">¡Muy pronto!</div>
+                    </div>
+                    <p><small>Mientras tanto, disfruta de nuestra programación en vivo.</small></p>
                 </body>
                 </html>`;
         }
@@ -731,5 +788,3 @@
     </script>
 </body>
 </html>
-
-
