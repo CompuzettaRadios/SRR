@@ -181,73 +181,90 @@
             transition:transform .3s;
         }
         
-        /* Panel lateral */
-        .schedule-panel{
-            position:fixed;
-            top:0;
-            left:-280px;
-            width:280px;
-            height:100vh;
-            padding:25px;
-            box-sizing:border-box;
-            background:rgba(10,10,30,0.85);
-            backdrop-filter:blur(15px);
-            color:#fff;
-            border-right:2px solid rgba(255,224,0,0.3);
-            box-shadow:4px 0 30px rgba(255,224,0,.2);
-            transition:left .4s ease;
-            z-index:1000;
+/* Panel lateral - MODIFICADO PARA HISTORIAL */
+        .schedule-panel {
+            position: fixed;
+            top: 0;
+            left: -380px; /* ANTES: -280px | AHORA: -380px para más espacio */
+            width: 380px; /* ANTES: 280px | AHORA: 380px para historial más amplio */
+            height: 100vh;
+            padding: 25px;
+            box-sizing: border-box;
+            background: rgba(10, 10, 30, 0.85);
+            backdrop-filter: blur(15px);
+            color: #fff;
+            border-right: 2px solid rgba(255, 224, 0, 0.3);
+            box-shadow: 4px 0 30px rgba(255, 224, 0, .2);
+            transition: left .4s ease;
+            z-index: 1000;
         }
-        
-        .schedule-panel.active{
-            left:0;
+
+        .schedule-panel.active {
+            left: 0;
         }
-        
-        .schedule-panel h3{
-            margin:0 0 20px;
-            text-align:center;
-            color:#FFE000;
-            font-size:1.3em;
-            font-weight:600;
-            text-shadow:0 0 10px rgba(255,224,0,0.5);
+
+        .schedule-panel h3 {
+            margin: 0 0 20px;
+            text-align: center;
+            color: #FFE000;
+            font-size: 1.3em;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(255, 224, 0, 0.5);
         }
-        
-        .ads-frame{
-            width:100%;
-            height:calc(100vh - 100px);
-            border:0;
-            border-radius:15px;
-            overflow:hidden;
-            background:rgba(0,0,0,0.2);
+
+        .ads-frame {
+            width: 100%;
+            height: calc(100vh - 100px);
+            border: 0;
+            border-radius: 15px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.2);
         }
-        
-        @media (max-width:600px){
-            .schedule-panel{
-                width:90%; 
-                left:-90%;
+
+        /* RESPONSIVE PARA PANEL - AJUSTES PARA HISTORIAL */
+        @media (max-width: 600px) {
+            .schedule-panel {
+                width: 95%; /* ANTES: 90% | AHORA: 95% para aprovechar mejor el espacio */
+                left: -95%; /* ANTES: -90% | AHORA: -95% */
             }
-            .schedule-panel.active{
-                left:0;
+            .schedule-panel.active {
+                left: 0;
             }
         }
-        
+
+        /* TABLET HORIZONTAL - NUEVO: Para 2 columnas en tablets */
+        @media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+            .schedule-panel {
+                width: 450px; /* Panel más amplio en tablets horizontales */
+                left: -450px;
+            }
+        }
+
+        /* DESKTOP - NUEVO: Panel aún más amplio para escritorio */
+        @media (min-width: 1025px) {
+            .schedule-panel {
+                width: 500px; /* Panel máximo para escritorio */
+                left: -500px;
+            }
+        }
+
         /* Overlay para cerrar panel */
-        .panel-overlay{
-            position:fixed;
-            top:0;
-            left:0;
-            width:100vw;
-            height:100vh;
-            background:rgba(0,0,0,0.5);
-            z-index:999;
-            opacity:0;
-            visibility:hidden;
-            transition:all .3s ease;
+        .panel-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all .3s ease;
         }
-        
-        .panel-overlay.active{
-            opacity:1;
-            visibility:visible;
+
+        .panel-overlay.active {
+            opacity: 1;
+            visibility: visible;
         }
 
         /* Notificación de segundo plano */
@@ -373,11 +390,15 @@
     
     <!-- Panel lateral -->
     <div class="schedule-panel" id="schedulePanel">
-        <h3>Publicidad</h3>
+        <h3>Historial</h3>
+        <!-- 
+        CAMBIO AQUÍ EL SRC SEGÚN LO QUE QUIERAS MOSTRAR:
+        - src="historial.html" (historial de canciones - ACTUAL)
+        - src="publicidad.html" (para publicidad)
+        - src="horarios.html" (para programación)
+        - src="contacto.html" (para información de contacto)
+        -->
         <iframe class="ads-frame" src="historial.html" loading="lazy"></iframe>
-
-        
-        
     </div>
 
     <!-- Notificación de segundo plano -->
@@ -398,19 +419,19 @@
         let deferredPrompt = null;
         
         /* Panel lateral */
-        $('#toggleArrow').on('click', e=>{
+        $('#toggleArrow').on('click', function(e) {
             e.stopPropagation();
             $('#schedulePanel').toggleClass('active');
             $('#panelOverlay').toggleClass('active');
         });
-        
-        $('#panelOverlay').on('click', e=>{
+
+        $('#panelOverlay').on('click', function(e) {
             $('#schedulePanel').removeClass('active');
             $('#panelOverlay').removeClass('active');
         });
-        
-        $(document).on('click', e=>{
-            if(!$(e.target).closest('#schedulePanel,#toggleArrow').length){
+
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('#schedulePanel,#toggleArrow').length) {
                 $('#schedulePanel').removeClass('active');
                 $('#panelOverlay').removeClass('active');
             }
@@ -653,6 +674,7 @@ $(document).ready(function() {
     </script>
 </body>
 </html>
+
 
 
 
