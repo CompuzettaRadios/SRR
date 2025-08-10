@@ -1,4 +1,87 @@
-// REEMPLAZA estas funciones en tu sw.js:
+const CACHE_VERSION = '2.1.0';
+const CACHE_NAME = `stereo-revelacion-v${CACHE_VERSION}`;
+
+// URLs para cachear - organizadas por prioridad
+const urlsToCache = [
+  './',
+  './index.html',
+  './historial.html', // 👈 LÍNEA AGREGADA
+  './manifest.json',
+  'https://code.jquery.com/jquery-3.2.1.min.js',
+  'https://extassisnetwork.com/player/Luna/luna.js',
+  'https://stereorevelacionradio.com/wp-content/uploads/2023/05/face-150x150.png',
+  'https://stereorevelacionradio.com/wp-content/uploads/2023/05/whstsapp-150x150.png',
+  'https://stereorevelacionradio.com/wp-content/uploads/2023/05/yt-150x150.png',
+  'https://stereorevelacionradio.com/wp-content/uploads/2023/05/pagina-150x150.png',
+  'https://stereorevelacionradio.com/wp-content/uploads/2022/12/logo-radio.png',
+  'https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png',
+  'https://stereorevelacionradio.com/wp-content/uploads/2025/08/logo-radio_Live.png'
+];
+
+// URLs que NUNCA deben ser cacheadas
+const neverCacheUrls = [
+  // Streams de audio
+  'cast6.my-control-panel.com',
+  '/stream',
+  'shoutcast',
+  'icecast',
+  // APIs dinámicas
+  '/played.html',
+  '/api/',
+  'php',
+  'ajax',
+  // Proxies CORS
+  'corsproxy.io',
+  'cors-anywhere.herokuapp.com',
+  'codetabs.com',
+  'allorigins.win',
+  // APIs externas
+  'itunes.apple.com'
+];
+
+// INSTALACIÓN DEL SERVICE WORKER
+self.addEventListener('install', function(event) {
+  console.log(`[SW] Instalando Service Worker v${CACHE_VERSION}...`);
+  
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(function(cache) {
+        console.log(`[SW] Cache abierto: ${CACHE_NAME}`);
+        return cache.addAll(urlsToCache.filter(url => {
+          // Solo cachear URLs que no estén en la lista negra
+          return !neverCacheUrls.some(blocked => url.includes(blocked));
+        }));
+      })
+      .then(function() {
+        console.log('[SW] Recursos cacheados exitosamente');
+        // Forzar activación inmediata
+        return self.skipWaiting();
+      })
+      .catch(function(error) {
+        console.error('[SW] Error durante instalación:', error);
+      })
+  );
+});
+
+// ACTIVACIÓN DEL SERVICE WORKER
+self.addEventListener('activate', function(event) {
+  console.log('[SW] Activando Service Worker...');
+  event.waitUntil(
+    caches.keys().then(function(cacheNames) {
+      return Promise.all(
+        cacheNames.map(function(cacheName) {
+          if (cacheName !== CACHE_NAME) {
+            console.log('[SW] Eliminando cache antiguo:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    }).then(function() {
+      console.log('[SW] Service Worker activado exitosamente');
+      return self.clients.claim();
+    })
+  );
+});
 
 // Función para determinar si es una request de navegación
 function isNavigationRequest(request) {
@@ -6,7 +89,27 @@ function isNavigationRequest(request) {
          (request.method === 'GET' && request.headers.get('accept').includes('text/html'));
 }
 
-// MODIFICAR el evento 'fetch' en sw.js (línea ~108):
+// Función para determinar si debe ser cacheado
+function shouldCache(url) {
+  // No cachear streams de audio
+  if (url.includes('cast6.my-control-panel.com') || 
+      url.includes('/stream') ||
+      url.includes('shoutcast') ||
+      url.includes('icecast')) {
+    return false;
+  }
+  
+  // No cachear APIs dinámicas
+  if (url.includes('/api/') || 
+      url.includes('php') ||
+      url.includes('ajax')) {
+    return false;
+  }
+  
+  return true;
+}
+
+// Intercepción de requests
 self.addEventListener('fetch', function(event) {
   const request = event.request;
   const url = new URL(request.url);
@@ -36,7 +139,7 @@ self.addEventListener('fetch', function(event) {
             console.log('[SW] Sirviendo historial.html desde cache');
             return cachedResponse;
           }
-          
+
           console.log('[SW] Fetching historial.html desde red');
           return fetch(request).then(function(response) {
             if (response && response.status === 200) {
@@ -148,7 +251,6 @@ self.addEventListener('fetch', function(event) {
     }
   }
 
-  // Resto del código permanece igual...
   // Manejar otros recursos (CSS, JS, imágenes)
   event.respondWith(
     caches.match(request)
@@ -186,4 +288,105 @@ self.addEventListener('fetch', function(event) {
         });
       })
   );
+});
+
+// Manejo de notificaciones push
+self.addEventListener('push', function(event) {
+  console.log('[SW] Push recibido:', event);
+  
+  let title = 'STEREO REVELACIÓN RADIO';
+  let body = 'Nueva notificación de la radio';
+  let icon = 'https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png';
+  let badge = 'https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png';
+  let data = {};
+
+  if (event.data) {
+    try {
+      const payload = event.data.json();
+      title = payload.title || title;
+      body = payload.body || body;
+      icon = payload.icon || icon;
+      badge = payload.badge || badge;
+      data = payload.data || {};
+    } catch (e) {
+      body = event.data.text() || body;
+    }
+  }
+
+  const options = {
+    body: body,
+    icon: icon,
+    badge: badge,
+    vibrate: [100, 50, 100],
+    data: {
+      dateOfArrival: Date.now(),
+      primaryKey: 1,
+      ...data
+    },
+    actions: [
+      {
+        action: 'open',
+        title: 'Abrir Radio',
+        icon: icon
+      },
+      {
+        action: 'close',
+        title: 'Cerrar',
+        icon: icon
+      }
+    ],
+    requireInteraction: false,
+    tag: 'stereo-revelacion-notification'
+  };
+  
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
+
+// Manejo de clicks en notificaciones
+self.addEventListener('notificationclick', function(event) {
+  console.log('[SW] Notificación clickeada:', event);
+  event.notification.close();
+  
+  const action = event.action;
+  
+  event.waitUntil(
+    clients.matchAll({
+      type: 'window',
+      includeUncontrolled: true
+    }).then(function(clientList) {
+      if (action === 'open' || !action) {
+        // Buscar ventana existente
+        for (let i = 0; i < clientList.length; i++) {
+          const client = clientList[i];
+          if (client.url.includes(self.location.origin) && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        
+        // Abrir nueva ventana
+        if (clients.openWindow) {
+          return clients.openWindow('./');
+        }
+      }
+      
+      return Promise.resolve();
+    })
+  );
+});
+
+// Manejo de cierre de notificaciones
+self.addEventListener('notificationclose', function(event) {
+  console.log('[SW] Notificación cerrada:', event);
+});
+
+// Manejo de errores
+self.addEventListener('error', function(event) {
+  console.error('[SW] Error:', event.error);
+});
+
+self.addEventListener('unhandledrejection', function(event) {
+  console.error('[SW] Promise rechazada:', event.reason);
+  event.preventDefault();
 });
