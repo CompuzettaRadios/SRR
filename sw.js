@@ -1,87 +1,4 @@
-const CACHE_VERSION = '2.1.0';
-const CACHE_NAME = `stereo-revelacion-v${CACHE_VERSION}`;
-
-// URLs para cachear - organizadas por prioridad
-const urlsToCache = [
-  './',
-  './index.html',
-  './historial.html',
-  './manifest.json',
-  'https://code.jquery.com/jquery-3.2.1.min.js',
-  'https://extassisnetwork.com/player/Luna/luna.js',
-  'https://stereorevelacionradio.com/wp-content/uploads/2023/05/face-150x150.png',
-  'https://stereorevelacionradio.com/wp-content/uploads/2023/05/whstsapp-150x150.png',
-  'https://stereorevelacionradio.com/wp-content/uploads/2023/05/yt-150x150.png',
-  'https://stereorevelacionradio.com/wp-content/uploads/2023/05/pagina-150x150.png',
-  'https://stereorevelacionradio.com/wp-content/uploads/2022/12/logo-radio.png',
-  'https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png',
-  'https://stereorevelacionradio.com/wp-content/uploads/2025/08/logo-radio_Live.png'
-];
-
-// URLs que NUNCA deben ser cacheadas
-const neverCacheUrls = [
-  // Streams de audio
-  'cast6.my-control-panel.com',
-  '/stream',
-  'shoutcast',
-  'icecast',
-  // APIs dinámicas
-  '/played.html',
-  '/api/',
-  'php',
-  'ajax',
-  // Proxies CORS
-  'corsproxy.io',
-  'cors-anywhere.herokuapp.com',
-  'codetabs.com',
-  'allorigins.win',
-  // APIs externas
-  'itunes.apple.com'
-];
-
-// INSTALACIÓN DEL SERVICE WORKER
-self.addEventListener('install', function(event) {
-  console.log(`[SW] Instalando Service Worker v${CACHE_VERSION}...`);
-  
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(function(cache) {
-        console.log(`[SW] Cache abierto: ${CACHE_NAME}`);
-        return cache.addAll(urlsToCache.filter(url => {
-          // Solo cachear URLs que no estén en la lista negra
-          return !neverCacheUrls.some(blocked => url.includes(blocked));
-        }));
-      })
-      .then(function() {
-        console.log('[SW] Recursos cacheados exitosamente');
-        // Forzar activación inmediata
-        return self.skipWaiting();
-      })
-      .catch(function(error) {
-        console.error('[SW] Error durante instalación:', error);
-      })
-  );
-});
-
-// ACTIVACIÓN DEL SERVICE WORKER
-self.addEventListener('activate', function(event) {
-  console.log('[SW] Activando Service Worker...');
-  event.waitUntil(
-    caches.keys().then(function(cacheNames) {
-      return Promise.all(
-        cacheNames.map(function(cacheName) {
-          if (cacheName !== CACHE_NAME) {
-            console.log('[SW] Eliminando cache antiguo:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(function() {
-      console.log('[SW] Service Worker activado exitosamente');
-      return self.clients.claim();
-    })
-  );
-});
+// REEMPLAZA estas funciones en tu sw.js:
 
 // Función para determinar si es una request de navegación
 function isNavigationRequest(request) {
@@ -89,27 +6,7 @@ function isNavigationRequest(request) {
          (request.method === 'GET' && request.headers.get('accept').includes('text/html'));
 }
 
-// Función para determinar si debe ser cacheado
-function shouldCache(url) {
-  // No cachear streams de audio
-  if (url.includes('cast6.my-control-panel.com') || 
-      url.includes('/stream') ||
-      url.includes('shoutcast') ||
-      url.includes('icecast')) {
-    return false;
-  }
-  
-  // No cachear APIs dinámicas
-  if (url.includes('/api/') || 
-      url.includes('php') ||
-      url.includes('ajax')) {
-    return false;
-  }
-  
-  return true;
-}
-
-// Intercepción de requests
+// MODIFICAR el evento 'fetch' en sw.js (línea ~108):
 self.addEventListener('fetch', function(event) {
   const request = event.request;
   const url = new URL(request.url);
@@ -129,46 +26,53 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  // Manejar requests de navegación (páginas HTML)
-  if (isNavigationRequest(request)) {
-    console.log('[SW] Request de navegación detectada');
+  // NUEVA LÓGICA: Permitir historial.html específicamente
+  if (request.url.includes('historial.html')) {
+    console.log('[SW] Request de historial.html detectada');
     event.respondWith(
-      caches.match('./index.html')
+      caches.match(request)
         .then(function(cachedResponse) {
           if (cachedResponse) {
-            console.log('[SW] Sirviendo index.html desde cache');
+            console.log('[SW] Sirviendo historial.html desde cache');
             return cachedResponse;
           }
           
-          console.log('[SW] Fetching index.html desde red');
-          return fetch('./index.html').then(function(response) {
+          console.log('[SW] Fetching historial.html desde red');
+          return fetch(request).then(function(response) {
             if (response && response.status === 200) {
-              // Cachear para futuras requests
+              // Cachear historial.html
               caches.open(CACHE_NAME).then(function(cache) {
-                cache.put('./index.html', response.clone());
+                cache.put(request, response.clone());
               });
               return response;
             }
-            throw new Error('No se pudo cargar index.html');
+            throw new Error('No se pudo cargar historial.html');
           });
         })
         .catch(function(error) {
-          console.error('[SW] Error cargando página:', error);
+          console.error('[SW] Error cargando historial.html:', error);
+          // Retornar respuesta de error específica para historial
           return new Response(
             `<!DOCTYPE html>
             <html>
             <head>
-              <title>STEREO REVELACIÓN RADIO - Offline</title>
+              <title>Historial - Error</title>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1">
               <style>
-                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #1a0d2e; color: #fff; }
+                body { 
+                  font-family: Arial, sans-serif; 
+                  text-align: center; 
+                  padding: 50px; 
+                  background: linear-gradient(135deg, #1a0d2e 0%, #2d1b69 30%, #16213e 70%, #0f1419 100%); 
+                  color: #fff; 
+                }
                 h1 { color: #FFE000; }
               </style>
             </head>
             <body>
-              <h1>STEREO REVELACIÓN RADIO</h1>
-              <p>No hay conexión a internet. La aplicación se cargará cuando se restablezca la conexión.</p>
+              <h1>🎵 Historial Musical</h1>
+              <p>No se pudo cargar el historial en este momento.</p>
               <button onclick="window.location.reload()">Intentar de nuevo</button>
             </body>
             </html>`,
@@ -183,6 +87,68 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
+  // Manejar otras requests de navegación (solo para rutas principales)
+  if (isNavigationRequest(request)) {
+    console.log('[SW] Request de navegación detectada');
+    
+    // Solo redirigir a index.html si es una navegación a la raíz
+    if (request.url === self.location.origin + '/' || 
+        request.url === self.location.origin + '/index.html' ||
+        request.url.endsWith('/')) {
+      
+      event.respondWith(
+        caches.match('./index.html')
+          .then(function(cachedResponse) {
+            if (cachedResponse) {
+              console.log('[SW] Sirviendo index.html desde cache');
+              return cachedResponse;
+            }
+            
+            console.log('[SW] Fetching index.html desde red');
+            return fetch('./index.html').then(function(response) {
+              if (response && response.status === 200) {
+                // Cachear para futuras requests
+                caches.open(CACHE_NAME).then(function(cache) {
+                  cache.put('./index.html', response.clone());
+                });
+                return response;
+              }
+              throw new Error('No se pudo cargar index.html');
+            });
+          })
+          .catch(function(error) {
+            console.error('[SW] Error cargando página:', error);
+            return new Response(
+              `<!DOCTYPE html>
+              <html>
+              <head>
+                <title>STEREO REVELACIÓN RADIO - Offline</title>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <style>
+                  body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #1a0d2e; color: #fff; }
+                  h1 { color: #FFE000; }
+                </style>
+              </head>
+              <body>
+                <h1>STEREO REVELACIÓN RADIO</h1>
+                <p>No hay conexión a internet. La aplicación se cargará cuando se restablezca la conexión.</p>
+                <button onclick="window.location.reload()">Intentar de nuevo</button>
+              </body>
+              </html>`,
+              {
+                status: 200,
+                statusText: 'OK',
+                headers: { 'Content-Type': 'text/html' }
+              }
+            );
+          })
+      );
+      return;
+    }
+  }
+
+  // Resto del código permanece igual...
   // Manejar otros recursos (CSS, JS, imágenes)
   event.respondWith(
     caches.match(request)
@@ -220,105 +186,4 @@ self.addEventListener('fetch', function(event) {
         });
       })
   );
-});
-
-// Manejo de notificaciones push
-self.addEventListener('push', function(event) {
-  console.log('[SW] Push recibido:', event);
-  
-  let title = 'STEREO REVELACIÓN RADIO';
-  let body = 'Nueva notificación de la radio';
-  let icon = 'https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png';
-  let badge = 'https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png';
-  let data = {};
-
-  if (event.data) {
-    try {
-      const payload = event.data.json();
-      title = payload.title || title;
-      body = payload.body || body;
-      icon = payload.icon || icon;
-      badge = payload.badge || badge;
-      data = payload.data || {};
-    } catch (e) {
-      body = event.data.text() || body;
-    }
-  }
-
-  const options = {
-    body: body,
-    icon: icon,
-    badge: badge,
-    vibrate: [100, 50, 100],
-    data: {
-      dateOfArrival: Date.now(),
-      primaryKey: 1,
-      ...data
-    },
-    actions: [
-      {
-        action: 'open',
-        title: 'Abrir Radio',
-        icon: icon
-      },
-      {
-        action: 'close',
-        title: 'Cerrar',
-        icon: icon
-      }
-    ],
-    requireInteraction: false,
-    tag: 'stereo-revelacion-notification'
-  };
-  
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
-});
-
-// Manejo de clicks en notificaciones
-self.addEventListener('notificationclick', function(event) {
-  console.log('[SW] Notificación clickeada:', event);
-  event.notification.close();
-  
-  const action = event.action;
-  
-  event.waitUntil(
-    clients.matchAll({
-      type: 'window',
-      includeUncontrolled: true
-    }).then(function(clientList) {
-      if (action === 'open' || !action) {
-        // Buscar ventana existente
-        for (let i = 0; i < clientList.length; i++) {
-          const client = clientList[i];
-          if (client.url.includes(self.location.origin) && 'focus' in client) {
-            return client.focus();
-          }
-        }
-        
-        // Abrir nueva ventana
-        if (clients.openWindow) {
-          return clients.openWindow('./');
-        }
-      }
-      
-      return Promise.resolve();
-    })
-  );
-});
-
-// Manejo de cierre de notificaciones
-self.addEventListener('notificationclose', function(event) {
-  console.log('[SW] Notificación cerrada:', event);
-});
-
-// Manejo de errores
-self.addEventListener('error', function(event) {
-  console.error('[SW] Error:', event.error);
-});
-
-self.addEventListener('unhandledrejection', function(event) {
-  console.error('[SW] Promise rechazada:', event.reason);
-  event.preventDefault();
 });
