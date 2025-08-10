@@ -1,8 +1,7 @@
-
 {
   "name": "STEREO REVELACIÓN RADIO",
   "short_name": "SRR",
-  "description": "Radio online STEREO REVELACIÓN RADIO - Música 24/7",
+  "description": "Radio online STEREO REVELACIÓN RADIO",
   "start_url": "./",
   "scope": "./",
   "id": "stereo-revelacion-radio",
@@ -75,14 +74,39 @@
       "purpose": "maskable"
     }
   ],
+  "shortcuts": [
+    {
+      "name": "Reproducir Radio",
+      "short_name": "Play",
+      "description": "Reproducir STEREO REVELACIÓN RADIO",
+      "url": "./?autoplay=true",
+      "icons": [
+        {
+          "src": "https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Historial Musical",
+      "short_name": "Historial",
+      "description": "Ver historial de canciones",
+      "url": "./?historial=true",
+      "icons": [
+        {
+          "src": "https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
   "screenshots": [
     {
       "src": "https://stereorevelacionradio.com/wp-content/uploads/2022/12/logo-radio.png",
       "sizes": "540x720",
       "type": "image/png",
-      "form_factor": "narrow"
+      "form_factor": "narrow",
+      "label": "Vista principal de la radio"
     }
   ]
 }
-
-
