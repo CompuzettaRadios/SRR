@@ -417,10 +417,6 @@
     </div>
     
     <script>
-    // Evitar que index.html se cargue dentro de un iframe
-if (window.self !== window.top) {
-    window.top.location.replace(window.self.location.href);
-}
         
         let isConnected = false;
         let audioContext = null;
@@ -683,21 +679,44 @@ $(document).ready(function() {
 
         // Función para verificar contenido del iframe y prevenir bucles
 function checkIframeContent(iframe) {
-    try {
-        const iframeSrc = iframe.src;
-        const currentUrl = window.location.href;
-        
-        if (iframeSrc.includes('index.html') || (iframeSrc === currentUrl)) {
-            console.warn('Bucle detectado en iframe');
-            iframe.src = 'data:text/html,<html><body style="background:#1a0d2e;color:#fff;text-align:center;padding:50px;font-family:sans-serif;"><h3>Historial no disponible</h3><p>Refresca la página</p></body></html>';
+    // Agregar un pequeño delay para evitar verificaciones prematuras
+    setTimeout(() => {
+        try {
+            const iframeSrc = iframe.src;
+            const currentUrl = window.location.href;
+            const baseUrl = window.location.origin + window.location.pathname;
+            
+            // Verificaciones más específicas
+            if (iframeSrc === currentUrl || 
+                iframeSrc === baseUrl || 
+                iframeSrc.endsWith('index.html') ||
+                iframeSrc === window.location.origin + '/') {
+                
+                console.warn('Bucle detectado - Cargando contenido de error');
+                iframe.src = 'data:text/html,<html><body style="background:#1a0d2e;color:#fff;text-align:center;padding:50px;font-family:sans-serif;"><h3>⚠️ Historial no disponible</h3><p>El archivo historial.html no se encuentra disponible.</p><small>Contacta al administrador del sitio.</small></body></html>';
+                return false;
+            }
+        } catch (error) {
+            // Error es normal debido a CORS cuando el iframe carga correctamente
+            console.log('Iframe funcionando correctamente');
         }
-    } catch (error) {
-        console.log('Iframe cargado correctamente');
-    }
+    }, 1000); // Verificar después de 1 segundo
+    
+    return true;
 }
+
+// 3. OPCIONAL: Agregar verificación adicional cada 5 segundos
+setInterval(() => {
+    const iframe = document.getElementById('historialFrame');
+    if (iframe && iframe.src.includes('index.html')) {
+        console.warn('Bucle detectado en verificación periódica');
+        iframe.src = 'data:text/html,<html><body style="background:#1a0d2e;color:#fff;text-align:center;padding:50px;font-family:sans-serif;"><h3>⚠️ Error recurrente</h3><p>El historial no puede cargarse correctamente.</p></body></html>';
+    }
+}, 5000);
     </script>
 </body>
 </html>
+
 
 
 
