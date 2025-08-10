@@ -30,7 +30,6 @@
     <script src="https://extassisnetwork.com/player/Luna/luna.js"></script>
 
     <style>
-        /* Reset & estructura general */
         html, body{
             height:100%;
             margin:0;
@@ -40,7 +39,6 @@
             overflow-x:hidden;
         }
         
-        /* Iconos sociales */
         .social-icons{
             display:flex;
             justify-content:center;
@@ -79,7 +77,6 @@
             transform:scale(1.15);
         }
         
-        /* Media queries para iconos */
         @media (max-width: 374px) {
             .social-icons{
                 gap: 12px;
@@ -123,7 +120,6 @@
             }
         }
 
-        /* Contenedor principal */
         #compuzetta{
             display:flex;
             flex-direction:column;
@@ -134,7 +130,6 @@
             box-sizing:border-box;
         }
 
-        /* Reproductor */
         #extassisnetwork{
             width:100% !important;
             height:100% !important;
@@ -144,7 +139,6 @@
             min-height:0;
         }
         
-        /* Botón flecha */
         #toggleArrow{
             position:fixed;
             top:50%;
@@ -181,7 +175,6 @@
             transition:transform .3s;
         }
         
-        /* Panel lateral */
         .schedule-panel {
             position: fixed;
             top: 0;
@@ -221,7 +214,6 @@
             background: rgba(0, 0, 0, 0.2);
         }
 
-        /* RESPONSIVE PARA PANEL */
         @media (max-width: 600px) {
             .schedule-panel {
                 width: 95%;
@@ -246,7 +238,6 @@
             }
         }
 
-        /* Overlay para cerrar panel */
         .panel-overlay {
             position: fixed;
             top: 0;
@@ -265,7 +256,6 @@
             visibility: visible;
         }
 
-        /* Notificación de segundo plano */
         .background-notification {
             position: fixed;
             top: 20px;
@@ -296,7 +286,6 @@
             opacity: 0;
         }
 
-        /* Notificación de instalación PWA */
         .install-banner {
             position: fixed;
             bottom: 20px;
@@ -330,7 +319,6 @@
             box-shadow: 0 8px 30px rgba(255, 224, 0, 0.6);
         }
 
-        /* Botón cerrar banner */
         .install-banner .close-btn {
             margin-left: 15px;
             background: rgba(0,0,0,0.2);
@@ -350,7 +338,6 @@
 
 <body>
     <div id="compuzetta">
-        <!-- Iconos sociales -->
         <div class="social-icons">
             <a href="https://www.facebook.com/profile.php?id=100067028263478" target="_blank">
                 <img src="https://stereorevelacionradio.com/wp-content/uploads/2023/05/face-150x150.png" alt="Facebook">
@@ -366,14 +353,11 @@
             </a>
         </div>
         
-        <!-- Reproductor -->
         <div id="extassisnetwork"></div>
     </div>
     
-    <!-- Overlay para cerrar panel -->
     <div class="panel-overlay" id="panelOverlay"></div>
     
-    <!-- Botón abrir/cerrar panel -->
     <div id="toggleArrow">
         <svg viewBox="0 0 24 24">
             <defs>
@@ -386,7 +370,6 @@
         </svg>
     </div>
     
-    <!-- Panel lateral -->
     <div class="schedule-panel" id="schedulePanel">
         <h3>🎵 Historial Musical</h3>
         <iframe class="ads-frame" 
@@ -396,30 +379,27 @@
                 referrerpolicy="no-referrer"></iframe>
     </div>
 
-    <!-- Notificación de segundo plano -->
     <div class="background-notification" id="backgroundNotification">
         🎵 Radio funcionando en segundo plano
     </div>
 
-    <!-- Banner de instalación PWA -->
     <div class="install-banner" id="installBanner">
         📱 ¡Instala la app en tu dispositivo!
         <button class="close-btn" id="closeBanner">×</button>
     </div>
     
     <script>
+        const APP_VERSION = "2.0.1";
         let isConnected = false;
         let audioContext = null;
         let wakeLock = null;
         let deferredPrompt = null;
         
-        /* Panel lateral */
         $('#toggleArrow').on('click', function(e) {
             e.stopPropagation();
             $('#schedulePanel').toggleClass('active');
             $('#panelOverlay').toggleClass('active');
             
-            // Cargar historial solo cuando se abre el panel
             if ($('#schedulePanel').hasClass('active')) {
                 loadHistorial();
             }
@@ -437,7 +417,6 @@
             }
         });
         
-        /* Funciones para segundo plano */
         async function requestWakeLock() {
             try {
                 if ('wakeLock' in navigator) {
@@ -510,7 +489,6 @@
             }, 3000);
         }
 
-        /* PWA Functions */
         function showInstallBanner() {
             const banner = $('#installBanner');
             const hasShownBanner = localStorage.getItem('pwa-banner-shown') === 'true';
@@ -534,7 +512,6 @@
             }
         }
 
-        // Event listeners para PWA
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
@@ -558,15 +535,14 @@
             hideInstallBanner();
         });
 
-        // Registrar Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
+                navigator.serviceWorker.register('sw.js?v=' + APP_VERSION)
                     .then((registration) => {
-                        console.log('SW registrado exitosamente:', registration);
+                        console.log('SW registrado:', registration);
                     })
-                    .catch((registrationError) => {
-                        console.log('SW falló al registrarse:', registrationError);
+                    .catch((err) => {
+                        console.log('SW error:', err);
                     });
             });
         }
@@ -583,131 +559,34 @@
         document.addEventListener('touchstart', () => { initAudioContext(); }, { once: true });
         document.addEventListener('click', () => { initAudioContext(); }, { once: true });
         
-        /* Función para cargar historial - CORREGIDA */
         function loadHistorial() {
             const iframe = document.getElementById('historialFrame');
-            if (!iframe) return;
+            if (!iframe || iframe.src) return;
             
-            // Si ya tiene contenido cargado, no recargar
-            if (iframe.src && iframe.src !== 'about:blank') return;
+            const historialUrl = './historial.html?v=' + Date.now();
             
-            // Definir múltiples opciones de URL para el historial
-            const historialOptions = [
-                'historial.html', // Página local del historial
-                'https://your-external-historial-service.com/api', // URL externa si tienes un servicio
-                'https://example.com/some-image.png', // Como fallback una imagen
-            ];
+            iframe.onload = function() {
+                console.log('Historial cargado exitosamente');
+            };
             
-            // Función para intentar cargar el historial
-            function tryLoadHistorial(urlIndex = 0) {
-                if (urlIndex >= historialOptions.length) {
-                    // Si todas las opciones fallan, mostrar contenido por defecto
-                    showDefaultHistorialContent(iframe);
-                    return;
-                }
-                
-                const currentUrl = historialOptions[urlIndex];
-                
-                // Verificar que no sea la misma URL que la página actual para evitar bucles
-                if (currentUrl === window.location.pathname || 
-                    currentUrl === window.location.href ||
-                    window.location.href.includes(currentUrl)) {
-                    // Si es la misma página, saltar a la siguiente opción
-                    tryLoadHistorial(urlIndex + 1);
-                    return;
-                }
-                
-                // Configurar el iframe
-                iframe.onload = function() {
-                    console.log('Historial cargado exitosamente:', currentUrl);
-                };
-                
-                iframe.onerror = function() {
-                    console.log('Error cargando:', currentUrl);
-                    tryLoadHistorial(urlIndex + 1);
-                };
-                
-                // Cargar la URL con parámetros únicos
-                const urlWithParams = currentUrl + (currentUrl.includes('?') ? '&' : '?') + 
-                                    'v=' + Date.now() + '&ref=player';
-                iframe.src = urlWithParams;
-            }
+            iframe.onerror = function() {
+                console.log('Error cargando historial');
+                showDefaultHistorialContent(iframe);
+            };
             
-            // Comenzar a intentar cargar el historial
-            tryLoadHistorial();
+            iframe.src = historialUrl;
         }
 
         function showDefaultHistorialContent(iframe) {
-            iframe.src = `data:text/html;charset=utf-8,
-                <html>
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1">
-                    <style>
-                        body {
-                            background: linear-gradient(135deg, #1a0d2e 0%, #2d1b69 30%, #16213e 70%, #0f1419 100%);
-                            color: #fff;
-                            text-align: center;
-                            padding: 30px 20px;
-                            font-family: 'Segoe UI', sans-serif;
-                            margin: 0;
-                            min-height: 100vh;
-                            display: flex;
-                            flex-direction: column;
-                            justify-content: center;
-                            align-items: center;
-                        }
-                        h3 {
-                            color: #FFE000;
-                            font-size: 1.5em;
-                            margin-bottom: 20px;
-                            text-shadow: 0 0 15px rgba(255, 224, 0, 0.5);
-                        }
-                        p {
-                            font-size: 1em;
-                            line-height: 1.6;
-                            max-width: 280px;
-                            margin: 15px auto;
-                            opacity: 0.9;
-                        }
-                        .icon {
-                            font-size: 4em;
-                            margin-bottom: 25px;
-                            animation: pulse 2s infinite;
-                        }
-                        @keyframes pulse {
-                            0%, 100% { transform: scale(1); }
-                            50% { transform: scale(1.1); }
-                        }
-                        .info-box {
-                            background: rgba(255, 224, 0, 0.1);
-                            border: 1px solid rgba(255, 224, 0, 0.3);
-                            border-radius: 15px;
-                            padding: 20px;
-                            margin: 20px 0;
-                            max-width: 300px;
-                        }
-                        .coming-soon {
-                            font-size: 0.9em;
-                            color: #FFE000;
-                            font-weight: 600;
-                            margin-top: 10px;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="icon">🎵</div>
-                    <h3>Historial Musical</h3>
-                    <div class="info-box">
-                        <p>El historial de canciones reproducidas estará disponible próximamente.</p>
-                        <div class="coming-soon">¡Muy pronto!</div>
-                    </div>
-                    <p><small>Mientras tanto, disfruta de nuestra programación en vivo.</small></p>
-                </body>
-                </html>`;
+            iframe.src = 'data:text/html;charset=utf-8,' + 
+                encodeURIComponent(`
+                <!DOCTYPE html>
+                <html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+                <style>body{background:linear-gradient(135deg, #1a0d2e 0%, #2d1b69 30%, #16213e 70%, #0f1419 100%);color:#fff;text-align:center;padding:30px 20px;font-family:'Segoe UI',sans-serif;margin:0;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;}h3{color:#FFE000;font-size:1.5em;margin-bottom:20px;text-shadow:0 0 15px rgba(255, 224, 0, 0.5);}p{font-size:1em;line-height:1.6;max-width:280px;margin:15px auto;opacity:0.9;}.icon{font-size:4em;margin-bottom:25px;animation:pulse 2s infinite;}@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}.info-box{background:rgba(255, 224, 0, 0.1);border:1px solid rgba(255, 224, 0, 0.3);border-radius:15px;padding:20px;margin:20px 0;max-width:300px;}.coming-soon{font-size:0.9em;color:#FFE000;font-weight:600;margin-top:10px;}</style>
+                </head><body><div class="icon">🎵</div><h3>Historial Musical</h3><div class="info-box"><p>El historial de canciones reproducidas estará disponible próximamente.</p><div class="coming-soon">¡Muy pronto!</div></div><p><small>Mientras tanto, disfruta de nuestra programación en vivo.</small></p></body></html>`
+                );
         }
 
-        /* Inicializar reproductor */
         $(document).ready(function() {
             $("#extassisnetwork").lunaradio({
                 streamurl: "https://cast6.my-control-panel.com/proxy/manrique/",
@@ -761,18 +640,14 @@
             });
         });
         
-        // Seguridad básica
         document.addEventListener('keydown', function(event) {
-            if (event.key === 'F12') {
-                event.preventDefault();
-            }
+            if (event.key === 'F12') event.preventDefault();
         });
 
         document.addEventListener('contextmenu', function(event) {
             event.preventDefault();
         });
 
-        // Mantener contexto activo
         setInterval(() => {
             if (isConnected && audioContext && audioContext.state === 'suspended') {
                 audioContext.resume();
