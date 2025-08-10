@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8" />  
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="shortcut icon" href="favin.ico" type="image/x-icon" />
-    
+ 
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#1a0d2e" />
     <meta name="background-color" content="#1a0d2e" />
@@ -28,7 +28,7 @@
     <!-- jQuery + Lunaradio -->
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://extassisnetwork.com/player/Luna/luna.js"></script>
-    
+
     <style>
         /* Reset & estructura general */
         html, body{
@@ -398,7 +398,11 @@
         - src="horarios.html" (para programación)
         - src="contacto.html" (para información de contacto)
         -->
-        <iframe class="ads-frame" src="https://compuzettaradios.github.io/SRR/historial.html" loading="lazy"></iframe>
+        <iframe class="ads-frame" 
+       id="historialFrame"
+       src="https://compuzettaradios.github.io/SRR/historial.html" 
+       loading="lazy"
+       onload="checkIframeContent(this)"></iframe>
     </div>
 
     <!-- Notificación de segundo plano -->
@@ -413,6 +417,11 @@
     </div>
     
     <script>
+    // Evitar que index.html se cargue dentro de un iframe
+if (window.self !== window.top) {
+    window.top.location.replace(window.self.location.href);
+}
+        
         let isConnected = false;
         let audioContext = null;
         let wakeLock = null;
@@ -671,9 +680,25 @@ $(document).ready(function() {
                 audioContext.resume();
             }
         });
+
+        // Función para verificar contenido del iframe y prevenir bucles
+function checkIframeContent(iframe) {
+    try {
+        const iframeSrc = iframe.src;
+        const currentUrl = window.location.href;
+        
+        if (iframeSrc.includes('index.html') || (iframeSrc === currentUrl)) {
+            console.warn('Bucle detectado en iframe');
+            iframe.src = 'data:text/html,<html><body style="background:#1a0d2e;color:#fff;text-align:center;padding:50px;font-family:sans-serif;"><h3>Historial no disponible</h3><p>Refresca la página</p></body></html>';
+        }
+    } catch (error) {
+        console.log('Iframe cargado correctamente');
+    }
+}
     </script>
 </body>
 </html>
+
 
 
 
