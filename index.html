@@ -181,12 +181,12 @@
             transition:transform .3s;
         }
         
-/* Panel lateral - MODIFICADO PARA HISTORIAL */
+        /* Panel lateral */
         .schedule-panel {
             position: fixed;
             top: 0;
-            left: -380px; /* ANTES: -280px | AHORA: -380px para más espacio */
-            width: 380px; /* ANTES: 280px | AHORA: 380px para historial más amplio */
+            left: -380px;
+            width: 380px;
             height: 100vh;
             padding: 25px;
             box-sizing: border-box;
@@ -221,29 +221,27 @@
             background: rgba(0, 0, 0, 0.2);
         }
 
-        /* RESPONSIVE PARA PANEL - AJUSTES PARA HISTORIAL */
+        /* RESPONSIVE PARA PANEL */
         @media (max-width: 600px) {
             .schedule-panel {
-                width: 95%; /* ANTES: 90% | AHORA: 95% para aprovechar mejor el espacio */
-                left: -95%; /* ANTES: -90% | AHORA: -95% */
+                width: 95%;
+                left: -95%;
             }
             .schedule-panel.active {
                 left: 0;
             }
         }
 
-        /* TABLET HORIZONTAL - NUEVO: Para 2 columnas en tablets */
         @media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
             .schedule-panel {
-                width: 450px; /* Panel más amplio en tablets horizontales */
+                width: 450px;
                 left: -450px;
             }
         }
 
-        /* DESKTOP - NUEVO: Panel aún más amplio para escritorio */
         @media (min-width: 1025px) {
             .schedule-panel {
-                width: 500px; /* Panel máximo para escritorio */
+                width: 500px;
                 left: -500px;
             }
         }
@@ -299,28 +297,28 @@
         }
 
         /* Notificación de instalación PWA */
-.install-banner {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(135deg, #FFE000 0%, #FFA500 100%);
-    color: #000;
-    padding: 10px 15px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    z-index: 10000;
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 224, 0, 0.5);
-    box-shadow: 0 4px 20px rgba(255, 224, 0, 0.4);
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    max-width: 90%;
-    text-align: center;
-}
+        .install-banner {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #FFE000 0%, #FFA500 100%);
+            color: #000;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 10000;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 224, 0, 0.5);
+            box-shadow: 0 4px 20px rgba(255, 224, 0, 0.4);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            max-width: 90%;
+            text-align: center;
+        }
 
         .install-banner.show {
             opacity: 1;
@@ -390,17 +388,11 @@
     
     <!-- Panel lateral -->
     <div class="schedule-panel" id="schedulePanel">
-        <h3></h3>
-        <!-- 
-        CAMBIO AQUÍ EL SRC SEGÚN LO QUE QUIERAS MOSTRAR:
-        - src="historial.html" (historial de canciones - ACTUAL)
-        - src="publicidad.html" (para publicidad)
-        - src="horarios.html" (para programación)
-        - src="contacto.html" (para información de contacto)
-        -->
+        <h3>Historial de Música</h3>
         <iframe class="ads-frame" 
-       id="historialFrame"
-       loading="lazy"></iframe>
+                id="historialFrame"
+                loading="lazy"
+                referrerpolicy="no-referrer"></iframe>
     </div>
 
     <!-- Notificación de segundo plano -->
@@ -415,7 +407,6 @@
     </div>
     
     <script>
-        
         let isConnected = false;
         let audioContext = null;
         let wakeLock = null;
@@ -426,6 +417,11 @@
             e.stopPropagation();
             $('#schedulePanel').toggleClass('active');
             $('#panelOverlay').toggleClass('active');
+            
+            // Cargar historial solo cuando se abre el panel
+            if ($('#schedulePanel').hasClass('active')) {
+                loadHistorial();
+            }
         });
 
         $('#panelOverlay').on('click', function(e) {
@@ -489,15 +485,12 @@
                 });
                 navigator.mediaSession.playbackState = isConnected ? 'playing' : 'paused';
                 
-                // Controles de media
                 navigator.mediaSession.setActionHandler('play', () => {
-                    // Reactivar reproducción si está pausada
                     const playButton = document.querySelector('[data-lunaradio="play"]');
                     if (playButton) playButton.click();
                 });
                 
                 navigator.mediaSession.setActionHandler('pause', () => {
-                    // Pausar reproducción
                     const stopButton = document.querySelector('[data-lunaradio="stop"]');
                     if (stopButton) stopButton.click();
                 });
@@ -544,8 +537,6 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            
-            // Mostrar banner después de 5 segundos
             setTimeout(showInstallBanner, 5000);
         });
 
@@ -555,7 +546,6 @@
             deferredPrompt = null;
         });
 
-        // Event listeners para banner
         $('#installBanner').on('click', function(e) {
             if (!e.target.classList.contains('close-btn')) {
                 installPWA();
@@ -592,40 +582,104 @@
         document.addEventListener('touchstart', () => { initAudioContext(); }, { once: true });
         document.addEventListener('click', () => { initAudioContext(); }, { once: true });
         
-/* Inicializar reproductor */
-$(document).ready(function() {
-    $("#extassisnetwork").lunaradio({
-        streamurl: "https://cast6.my-control-panel.com/proxy/manrique/",
-        radioname: "STEREO REVELACIÓN RADIO",
-        coverimage: "https://stereorevelacionradio.com/wp-content/uploads/2022/12/logo-radio.png",
-        onlycoverimage: false, // ← CARATULA: false= interactivo / true= logo
-        // NUEVOS PARÁMETROS AGREGADOS PARA SOLUCIONAR MODO DJ:
-        defaultcoverimage: "https://stereorevelacionradio.com/wp-content/uploads/2025/08/logo-radio_Live.png", // Logo cuando no hay carátula disponible
-        unknownartisttext: "Stereo Revelación Radio", // Texto personalizado en lugar de "Unknown Artist"
-        unknowntitletext: "Transmisión en Vivo", // Texto personalizado en lugar de "Unknown Title"
-        userinterface: "big",
-        backgroundcolor: "#1a0d2e",
-        fontcolor: "#FFFFFF",
-        hightlightcolor: "#FFE000",
-        fontname: "Segoe UI",
-        scroll: "true",
-        coverstyle: "animated",
-        usevisualizer: "real",
-        visualizertype: "6",
-        multicolorvisualizer: "true",
-        color1: "#FF6B35",
-        color2: "#F7931E", 
-        color3: "#FFD700",
-        color4: "#32CD32",
-        color5: "#00CED1",
-        color6: "#9A4FD4",
-        visualizercolor: "#FFE000",
-        streamtype: "shoutcast2",
-        shoutcastpath: "/stream",
-        shoutcastid: "1",
-        volume: "90",
-        autoplay: "true",
-        usestreamcorsproxy: "true",
+        /* Función para cargar historial sin bucles */
+        function loadHistorial() {
+            const iframe = document.getElementById('historialFrame');
+            if (!iframe || iframe.src) return; // No recargar si ya tiene src
+            
+            const historialUrl = 'https://compuzettaradios.github.io/SRR/historial.html';
+            
+            // Verificar que la URL no sea la misma que la página actual
+            if (historialUrl === window.location.href) {
+                showHistorialError(iframe);
+                return;
+            }
+            
+            // Cargar con parámetro único para evitar cache
+            iframe.src = historialUrl + '?t=' + Date.now();
+            
+            // Error handler
+            iframe.onerror = function() {
+                showHistorialError(iframe);
+            };
+        }
+
+        function showHistorialError(iframe) {
+            iframe.src = `data:text/html;charset=utf-8,
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        body {
+                            background: linear-gradient(135deg, #1a0d2e 0%, #2d1b69 50%, #16213e 100%);
+                            color: #fff;
+                            text-align: center;
+                            padding: 30px 20px;
+                            font-family: 'Segoe UI', sans-serif;
+                            margin: 0;
+                            min-height: 100vh;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: center;
+                            align-items: center;
+                        }
+                        h3 {
+                            color: #FFE000;
+                            font-size: 1.5em;
+                            margin-bottom: 15px;
+                            text-shadow: 0 0 10px rgba(255, 224, 0, 0.3);
+                        }
+                        p {
+                            font-size: 1em;
+                            line-height: 1.6;
+                            max-width: 300px;
+                            margin: 10px auto;
+                        }
+                        .icon {
+                            font-size: 3em;
+                            margin-bottom: 20px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="icon">🎵</div>
+                    <h3>Historial no disponible</h3>
+                    <p>El historial de música no está disponible en este momento.</p>
+                    <p><small>Inténtalo más tarde.</small></p>
+                </body>
+                </html>`;
+        }
+
+        /* Inicializar reproductor */
+        $(document).ready(function() {
+            $("#extassisnetwork").lunaradio({
+                streamurl: "https://cast6.my-control-panel.com/proxy/manrique/",
+                radioname: "STEREO REVELACIÓN RADIO",
+                coverimage: "https://stereorevelacionradio.com/wp-content/uploads/2022/12/logo-radio.png",
+                onlycoverimage: false,
+                userinterface: "big",
+                backgroundcolor: "#1a0d2e",
+                fontcolor: "#FFFFFF",
+                hightlightcolor: "#FFE000",
+                fontname: "Segoe UI",
+                scroll: "true",
+                coverstyle: "animated",
+                usevisualizer: "real",
+                visualizertype: "6",
+                multicolorvisualizer: "true",
+                color1: "#FF6B35",
+                color2: "#F7931E", 
+                color3: "#FFD700",
+                color4: "#32CD32",
+                color5: "#00CED1",
+                color6: "#9A4FD4",
+                visualizercolor: "#FFE000",
+                streamtype: "shoutcast2",
+                shoutcastpath: "/stream",
+                shoutcastid: "1",
+                volume: "90",
+                autoplay: "true",
+                usestreamcorsproxy: "true",
                 
                 onPlay: function() {
                     isConnected = true;
@@ -650,7 +704,7 @@ $(document).ready(function() {
             });
         });
         
-        // Bloquear F12 y clic derecho
+        // Seguridad básica
         document.addEventListener('keydown', function(event) {
             if (event.key === 'F12') {
                 event.preventDefault();
@@ -674,156 +728,6 @@ $(document).ready(function() {
                 audioContext.resume();
             }
         });
-
-function loadHistorialSafely() {
-    const iframe = document.getElementById('historialFrame');
-    if (!iframe) return;
-    
-    console.log('Intentando cargar historial...');
-    
-    // Primero verificar si el archivo existe
-    fetch('https://compuzettaradios.github.io/SRR/historial.html', {
-        method: 'HEAD',
-        cache: 'no-cache'
-    })
-    .then(response => {
-        if (response.ok && response.headers.get('content-type')?.includes('text/html')) {
-            console.log('Historial encontrado, cargando...');
-            iframe.src = 'https://compuzettaradios.github.io/SRR/historial.html?t=' + Date.now();
-        } else {
-            console.warn('Historial no encontrado, mostrando contenido alternativo');
-            showHistorialError(iframe);
-        }
-    })
-    .catch(error => {
-        console.error('Error verificando historial:', error);
-        showHistorialError(iframe);
-    });
-}
-
-// 3. FUNCIÓN PARA MOSTRAR CONTENIDO DE ERROR
-function showHistorialError(iframe) {
-    iframe.src = `data:text/html,
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                body {
-                    background: linear-gradient(135deg, #1a0d2e 0%, #2d1b69 50%, #16213e 100%);
-                    color: #fff;
-                    text-align: center;
-                    padding: 30px 20px;
-                    font-family: 'Segoe UI', sans-serif;
-                    margin: 0;
-                    min-height: 100vh;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    align-items: center;
-                }
-                h3 {
-                    color: #FFE000;
-                    font-size: 1.5em;
-                    margin-bottom: 15px;
-                    text-shadow: 0 0 10px rgba(255, 224, 0, 0.3);
-                }
-                p {
-                    font-size: 1em;
-                    line-height: 1.6;
-                    max-width: 300px;
-                    margin: 10px auto;
-                }
-                .icon {
-                    font-size: 3em;
-                    margin-bottom: 20px;
-                }
-                .retry-btn {
-                    background: linear-gradient(135deg, #FFE000 0%, #FFA500 100%);
-                    color: #000;
-                    border: none;
-                    padding: 12px 24px;
-                    border-radius: 25px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    margin-top: 20px;
-                    transition: transform 0.2s;
-                }
-                .retry-btn:hover {
-                    transform: scale(1.05);
-                }
-            </style>
-        </head>
-        <body>
-            <div class="icon">🎵</div>
-            <h3>Historial no disponible</h3>
-            <p>El archivo historial.html no se encuentra en el servidor.</p>
-            <p><small>Verifica que el archivo esté subido correctamente al repositorio.</small></p>
-            <button class="retry-btn" onclick="parent.loadHistorialSafely()">
-                🔄 Reintentar
-            </button>
-        </body>
-        </html>`;
-}
-
-// 4. VERIFICACIÓN ADICIONAL PARA EVITAR BUCLES
-function monitorIframe() {
-    const iframe = document.getElementById('historialFrame');
-    if (!iframe) return;
-    
-    iframe.onload = function() {
-        setTimeout(() => {
-            try {
-                const iframeSrc = iframe.src;
-                
-                // Si el iframe cargó el index.html, es un bucle
-                if (iframeSrc.includes('index.html') || 
-                    iframeSrc === window.location.href ||
-                    iframeSrc === window.location.origin + window.location.pathname) {
-                    
-                    console.warn('🚫 BUCLE DETECTADO - Bloqueando');
-                    showHistorialError(iframe);
-                    return;
-                }
-                
-                console.log('✅ Iframe cargado correctamente');
-                
-            } catch (error) {
-                // Error de CORS es normal cuando el iframe carga contenido externo correctamente
-                console.log('✅ Iframe cargado (CORS normal)');
-            }
-        }, 500);
-    };
-    
-    iframe.onerror = function() {
-        console.error('❌ Error cargando iframe');
-        showHistorialError(iframe);
-    };
-}
-
-// 5. INICIALIZAR CUANDO EL DOM ESTÉ LISTO
-$(document).ready(function() {
-    // Esperar un poco antes de cargar para evitar conflictos
-    setTimeout(() => {
-        monitorIframe();
-        loadHistorialSafely();
-    }, 1000);
-});
-
-// 6. FUNCIÓN GLOBAL PARA REINTENTOS (llamada desde el botón)
-window.loadHistorialSafely = loadHistorialSafely;
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
