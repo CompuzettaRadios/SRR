@@ -400,9 +400,7 @@
         -->
         <iframe class="ads-frame" 
        id="historialFrame"
-       src="https://compuzettaradios.github.io/SRR/historial.html" 
-       loading="lazy"
-       onload="checkIframeContent(this)"></iframe>
+       loading="lazy"></iframe>
     </div>
 
     <!-- Notificación de segundo plano -->
@@ -677,45 +675,146 @@ $(document).ready(function() {
             }
         });
 
-        // Función para verificar contenido del iframe y prevenir bucles
-function checkIframeContent(iframe) {
-    // Agregar un pequeño delay para evitar verificaciones prematuras
-    setTimeout(() => {
-        try {
-            const iframeSrc = iframe.src;
-            const currentUrl = window.location.href;
-            const baseUrl = window.location.origin + window.location.pathname;
-            
-            // Verificaciones más específicas
-            if (iframeSrc === currentUrl || 
-                iframeSrc === baseUrl || 
-                iframeSrc.endsWith('index.html') ||
-                iframeSrc === window.location.origin + '/') {
-                
-                console.warn('Bucle detectado - Cargando contenido de error');
-                iframe.src = 'data:text/html,<html><body style="background:#1a0d2e;color:#fff;text-align:center;padding:50px;font-family:sans-serif;"><h3>⚠️ Historial no disponible</h3><p>El archivo historial.html no se encuentra disponible.</p><small>Contacta al administrador del sitio.</small></body></html>';
-                return false;
-            }
-        } catch (error) {
-            // Error es normal debido a CORS cuando el iframe carga correctamente
-            console.log('Iframe funcionando correctamente');
-        }
-    }, 1000); // Verificar después de 1 segundo
+function loadHistorialSafely() {
+    const iframe = document.getElementById('historialFrame');
+    if (!iframe) return;
     
-    return true;
+    console.log('Intentando cargar historial...');
+    
+    // Primero verificar si el archivo existe
+    fetch('https://compuzettaradios.github.io/SRR/historial.html', {
+        method: 'HEAD',
+        cache: 'no-cache'
+    })
+    .then(response => {
+        if (response.ok && response.headers.get('content-type')?.includes('text/html')) {
+            console.log('Historial encontrado, cargando...');
+            iframe.src = 'https://compuzettaradios.github.io/SRR/historial.html?t=' + Date.now();
+        } else {
+            console.warn('Historial no encontrado, mostrando contenido alternativo');
+            showHistorialError(iframe);
+        }
+    })
+    .catch(error => {
+        console.error('Error verificando historial:', error);
+        showHistorialError(iframe);
+    });
 }
 
-// 3. OPCIONAL: Agregar verificación adicional cada 5 segundos
-setInterval(() => {
+// 3. FUNCIÓN PARA MOSTRAR CONTENIDO DE ERROR
+function showHistorialError(iframe) {
+    iframe.src = `data:text/html,
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body {
+                    background: linear-gradient(135deg, #1a0d2e 0%, #2d1b69 50%, #16213e 100%);
+                    color: #fff;
+                    text-align: center;
+                    padding: 30px 20px;
+                    font-family: 'Segoe UI', sans-serif;
+                    margin: 0;
+                    min-height: 100vh;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                }
+                h3 {
+                    color: #FFE000;
+                    font-size: 1.5em;
+                    margin-bottom: 15px;
+                    text-shadow: 0 0 10px rgba(255, 224, 0, 0.3);
+                }
+                p {
+                    font-size: 1em;
+                    line-height: 1.6;
+                    max-width: 300px;
+                    margin: 10px auto;
+                }
+                .icon {
+                    font-size: 3em;
+                    margin-bottom: 20px;
+                }
+                .retry-btn {
+                    background: linear-gradient(135deg, #FFE000 0%, #FFA500 100%);
+                    color: #000;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 25px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    margin-top: 20px;
+                    transition: transform 0.2s;
+                }
+                .retry-btn:hover {
+                    transform: scale(1.05);
+                }
+            </style>
+        </head>
+        <body>
+            <div class="icon">🎵</div>
+            <h3>Historial no disponible</h3>
+            <p>El archivo historial.html no se encuentra en el servidor.</p>
+            <p><small>Verifica que el archivo esté subido correctamente al repositorio.</small></p>
+            <button class="retry-btn" onclick="parent.loadHistorialSafely()">
+                🔄 Reintentar
+            </button>
+        </body>
+        </html>`;
+}
+
+// 4. VERIFICACIÓN ADICIONAL PARA EVITAR BUCLES
+function monitorIframe() {
     const iframe = document.getElementById('historialFrame');
-    if (iframe && iframe.src.includes('index.html')) {
-        console.warn('Bucle detectado en verificación periódica');
-        iframe.src = 'data:text/html,<html><body style="background:#1a0d2e;color:#fff;text-align:center;padding:50px;font-family:sans-serif;"><h3>⚠️ Error recurrente</h3><p>El historial no puede cargarse correctamente.</p></body></html>';
-    }
-}, 5000);
+    if (!iframe) return;
+    
+    iframe.onload = function() {
+        setTimeout(() => {
+            try {
+                const iframeSrc = iframe.src;
+                
+                // Si el iframe cargó el index.html, es un bucle
+                if (iframeSrc.includes('index.html') || 
+                    iframeSrc === window.location.href ||
+                    iframeSrc === window.location.origin + window.location.pathname) {
+                    
+                    console.warn('🚫 BUCLE DETECTADO - Bloqueando');
+                    showHistorialError(iframe);
+                    return;
+                }
+                
+                console.log('✅ Iframe cargado correctamente');
+                
+            } catch (error) {
+                // Error de CORS es normal cuando el iframe carga contenido externo correctamente
+                console.log('✅ Iframe cargado (CORS normal)');
+            }
+        }, 500);
+    };
+    
+    iframe.onerror = function() {
+        console.error('❌ Error cargando iframe');
+        showHistorialError(iframe);
+    };
+}
+
+// 5. INICIALIZAR CUANDO EL DOM ESTÉ LISTO
+$(document).ready(function() {
+    // Esperar un poco antes de cargar para evitar conflictos
+    setTimeout(() => {
+        monitorIframe();
+        loadHistorialSafely();
+    }, 1000);
+});
+
+// 6. FUNCIÓN GLOBAL PARA REINTENTOS (llamada desde el botón)
+window.loadHistorialSafely = loadHistorialSafely;
     </script>
 </body>
 </html>
+
 
 
 
