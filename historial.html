@@ -12,7 +12,6 @@
     }
 
     body {
-      /* MISMO FONDO QUE LA RADIO APP */
       background: linear-gradient(135deg, #1a0d2e 0%, #2d1b69 30%, #16213e 70%, #0f1419 100%);
       font-family: "Segoe UI", Tahoma, sans-serif;
       padding: 15px;
@@ -26,7 +25,6 @@
     }
     
     .header h1 {
-      /* ESTILO DORADO COMO EL PANEL */
       color: #FFE000;
       font-size: 1.2rem;
       font-weight: 600;
@@ -41,8 +39,8 @@
       height: calc(100vh - 100px);
     }
     
+    /* GRID RESPONSIVE PARA HISTORIAL - NUEVO SISTEMA */
     #history {
-      /* CONTENEDOR CON ESTILO GLASSMORPHISM */
       background: rgba(10, 10, 30, 0.4);
       backdrop-filter: blur(15px);
       border-radius: 15px;
@@ -50,13 +48,33 @@
       padding: 15px;
       height: 100%;
       overflow-y: auto;
-      display: flex;
-      flex-direction: column;
+      
+      /* GRID ADAPTATIVO SEGÚN ORIENTACIÓN Y TAMAÑO */
+      display: grid;
       gap: 10px;
+      
+      /* MÓVIL VERTICAL: 1 columna */
+      grid-template-columns: 1fr;
+    }
+
+    /* TABLET Y MÓVIL HORIZONTAL: 2 columnas */
+    @media (min-width: 480px) and (orientation: landscape),
+           (min-width: 600px) {
+      #history {
+        grid-template-columns: repeat(2, 1fr); /* 2 columnas en horizontal o tablets */
+        gap: 12px;
+      }
+    }
+
+    /* PANTALLAS GRANDES: 3 columnas máximo */
+    @media (min-width: 900px) {
+      #history {
+        grid-template-columns: repeat(3, 1fr); /* 3 columnas en pantallas muy amplias */
+        gap: 15px;
+      }
     }
     
     .song-card {
-      /* MISMO ESTILO QUE EL PANEL LATERAL */
       background: rgba(255, 255, 255, 0.05);
       border-radius: 10px;
       display: flex;
@@ -66,17 +84,18 @@
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 224, 0, 0.1);
       transition: all 0.3s ease;
+      min-height: 80px; /* ALTURA MÍNIMA PARA CONSISTENCIA */
     }
     
     .song-card:hover {
-      /* EFECTO HOVER DORADO */
       background: rgba(255, 224, 0, 0.1);
       border-color: rgba(255, 224, 0, 0.3);
-      transform: translateX(5px);
+      transform: translateY(-2px); /* CAMBIO: translateX por translateY para efecto más sutil */
       box-shadow: 0 4px 15px rgba(255, 224, 0, 0.2);
     }
     
     .album-cover {
+      /* TAMAÑOS ADAPTIVOS SEGÚN PANTALLA */
       width: 60px;
       height: 60px;
       border-radius: 8px;
@@ -84,6 +103,21 @@
       flex-shrink: 0;
       background: rgba(255, 224, 0, 0.1);
       border: 1px solid rgba(255, 224, 0, 0.2);
+    }
+
+    /* CARÁTULAS MÁS PEQUEÑAS EN GRID DE 2+ COLUMNAS */
+    @media (min-width: 480px) and (orientation: landscape),
+           (min-width: 600px) {
+      .album-cover {
+        width: 50px;
+        height: 50px;
+      }
+      
+      .song-card {
+        padding: 10px;
+        gap: 10px;
+        min-height: 70px;
+      }
     }
     
     .song-info {
@@ -95,9 +129,7 @@
     }
     
     .artist {
-      /* ARTISTA EN DORADO BRILLANTE */
       font-weight: 700;
-      font-size: 0.95rem;
       color: #FFE000;
       line-height: 1.2;
       overflow: hidden;
@@ -105,20 +137,38 @@
       white-space: nowrap;
       text-transform: uppercase;
       text-shadow: 0 0 8px rgba(255, 224, 0, 0.4);
+      
+      /* TAMAÑOS ADAPTATIVOS */
+      font-size: 0.95rem;
     }
     
     .title {
-      /* TÍTULO EN BLANCO SUAVE */
       font-weight: 400;
-      font-size: 0.85rem;
       color: rgba(255, 255, 255, 0.8);
       line-height: 1.3;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      
+      /* TAMAÑOS ADAPTATIVOS */
+      font-size: 0.85rem;
+    }
+
+    /* TEXTO MÁS COMPACTO EN GRIDS MÚLTIPLES */
+    @media (min-width: 480px) and (orientation: landscape),
+           (min-width: 600px) {
+      .artist {
+        font-size: 0.85rem;
+      }
+      
+      .title {
+        font-size: 0.75rem;
+      }
     }
     
     .loading {
+      /* LOADING OCUPA TODA LA FILA EN GRID */
+      grid-column: 1 / -1;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -128,7 +178,6 @@
     }
     
     .spinner {
-      /* SPINNER DORADO */
       width: 20px;
       height: 20px;
       border: 2px solid rgba(255, 224, 0, 0.2);
@@ -144,6 +193,8 @@
     }
     
     .error {
+      /* ERROR OCUPA TODA LA FILA EN GRID */
+      grid-column: 1 / -1;
       text-align: center;
       color: rgba(255, 255, 255, 0.6);
       padding: 40px;
@@ -169,7 +220,7 @@
       background: rgba(255, 224, 0, 0.5);
     }
     
-    @media (max-width: 768px) {
+    @media (max-width: 480px) {
       body {
         padding: 10px;
       }
@@ -204,6 +255,22 @@
       0% { background-position: 200% 0; }
       100% { background-position: -200% 0; }
     }
+
+    /* MENSAJE CUANDO NO HAY DATOS - SIN DATOS DE PRUEBA */
+    .no-data {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.6);
+      padding: 60px 20px;
+      font-size: 1rem;
+    }
+
+    .no-data img {
+      width: 80px;
+      height: 80px;
+      opacity: 0.6;
+      margin-bottom: 15px;
+    }
   </style>
 </head>
 <body>
@@ -221,23 +288,19 @@
   </div>
 
   <script>
-    // CONFIGURACIÓN - FÁCIL DE MODIFICAR
+    // CONFIGURACIÓN - NUEVO LOGO SIN DATOS DE PRUEBA
     const fallbackCover = "https://stereorevelacionradio.com/wp-content/uploads/2025/08/logo-radio_Live.png";
     const coverCache = new Map();
     
-    // FUNCIÓN PRINCIPAL - OBTENER HISTORIAL DE LA RADIO
     async function fetchHistory() {
-      // MÚLTIPLES PROXIES PARA EVITAR FALLOS
       const proxies = [
         "https://corsproxy.io/?", 
         "https://cors-anywhere.herokuapp.com/",
         "https://api.codetabs.com/v1/proxy?quest="
       ];
       
-      // URL DE TU SERVIDOR DE RADIO
       const targetUrl = "https://cast6.my-control-panel.com/proxy/manrique/played.html?sid=1";
       
-      // INTENTAR CADA PROXY HASTA QUE UNO FUNCIONE
       for (let i = 0; i < proxies.length; i++) {
         try {
           console.log(`Intentando proxy ${i + 1}: ${proxies[i]}`);
@@ -251,7 +314,6 @@
           
           let html;
           
-          // DIFERENTES TIPOS DE RESPUESTA SEGÚN EL PROXY
           if (proxies[i].includes('codetabs')) {
             const data = await res.json();
             html = data.contents || data;
@@ -259,24 +321,23 @@
             html = await res.text();
           }
           
-          console.log(`✓ Proxy ${i + 1} funcionó! HTML recibido:`, html.substring(0, 500));
+          console.log(`✓ Proxy ${i + 1} funcionó!`);
           
           await parseHistory(html);
-          return; // SALIR SI FUE EXITOSO
+          return;
           
         } catch (error) {
           console.log(`✗ Proxy ${i + 1} falló:`, error.message);
           
-          // SI TODOS FALLAN, MOSTRAR DATOS DE PRUEBA
+          // SI TODOS FALLAN, MOSTRAR MENSAJE SIN DATOS
           if (i === proxies.length - 1) {
-            console.log("Todos los proxies fallaron, usando datos de prueba...");
-            await showTestData();
+            console.log("Todos los proxies fallaron");
+            showNoDataMessage();
           }
         }
       }
     }
     
-    // PROCESAR EL HTML DEL HISTORIAL
     async function parseHistory(html) {
       const historyContainer = document.getElementById("history");
       historyContainer.innerHTML = "";
@@ -284,21 +345,14 @@
       const uniqueSongs = new Set();
       const songsToShow = [];
       
-      console.log("=== PARSEANDO HTML ===");
-      console.log("HTML completo:", html);
-      
-      // MÉTODO 1: BUSCAR TABLA HTML CON <td>
+      // MÉTODO 1: BUSCAR TABLA HTML
       const tableRegex = /<td[^>]*>([^<]+)<\/td>\s*<td[^>]*>([^<]+)<\/td>/g;
       let match;
       
-      // EXTRAER CANCIONES DE LA TABLA
-      while ((match = tableRegex.exec(html)) !== null && songsToShow.length < 15) {
+      while ((match = tableRegex.exec(html)) !== null && songsToShow.length < 20) { // AUMENTADO A 20 para aprovechar el grid
         const cell1 = match[1].trim();
         const cell2 = match[2].trim();
         
-        console.log("Celda encontrada:", cell1, "|", cell2);
-        
-        // SI cell1 ES UNA HORA, USAR cell2 COMO CANCIÓN
         if (/^\d{1,2}:\d{2}:\d{2}$/.test(cell1) && cell2) {
           if (cell2.includes(' - ') && 
               !cell2.includes('Radio -') && 
@@ -317,20 +371,16 @@
               if (!uniqueSongs.has(songKey)) {
                 uniqueSongs.add(songKey);
                 songsToShow.push({ artist: cleanArtist, title: cleanTitle });
-                console.log("✓ Canción agregada:", cleanArtist, "-", cleanTitle);
               }
             }
           }
         }
       }
       
-      // MÉTODO 2: BUSCAR FORMATO TEXTO PLANO SI NO HAY TABLA
+      // MÉTODO 2: FORMATO TEXTO PLANO
       if (songsToShow.length === 0) {
-        console.log("Método tabla falló, probando formato texto...");
-        
         const lines = html.split(/[\n\r]+/);
         for (const line of lines) {
-          // BUSCAR LÍNEAS COMO "21:05:27Esperanza de Vida - Hoy es tiempo"
           const timeMatch = line.match(/(\d{1,2}:\d{2}:\d{2})(.+)/);
           if (timeMatch) {
             const songData = timeMatch[2].trim();
@@ -353,9 +403,8 @@
                 if (!uniqueSongs.has(songKey)) {
                   uniqueSongs.add(songKey);
                   songsToShow.push({ artist: cleanArtist, title: cleanTitle });
-                  console.log("✓ Canción agregada (texto):", cleanArtist, "-", cleanTitle);
                   
-                  if (songsToShow.length >= 15) break;
+                  if (songsToShow.length >= 20) break; // AUMENTADO A 20
                 }
               }
             }
@@ -363,44 +412,29 @@
         }
       }
       
-      console.log(`Canciones encontradas: ${songsToShow.length}`, songsToShow);
-      
-      // MOSTRAR CANCIONES
+      // MOSTRAR CANCIONES O MENSAJE DE NO DATOS
       if (songsToShow.length > 0) {
+        console.log(`Canciones encontradas: ${songsToShow.length}`);
         for (const song of songsToShow) {
           await createSongCard(song.artist, song.title, historyContainer);
         }
       } else {
-        await showTestData();
+        showNoDataMessage();
       }
     }
     
-    // DATOS DE PRUEBA SI FALLA LA CONEXIÓN
-    async function showTestData() {
-      console.log("Mostrando datos de ejemplo...");
+    // NUEVA FUNCIÓN: MOSTRAR MENSAJE SIN DATOS (SIN DATOS DE PRUEBA)
+    function showNoDataMessage() {
       const historyContainer = document.getElementById("history");
-      
-      const testSongs = [
-        { artist: "Esperanza de Vida", title: "Hoy es tiempo" },
-        { artist: "Palabra Miel Santiago Atitlán", title: "Manantial De Agua Viva" },
-        { artist: "Braulio Hito", title: "A Cristo Se Convirtieron" },
-        { artist: "Mariachis", title: "Bendito Jesus" },
-        { artist: "Jesus Adrian Romero", title: "Tu Estas Aqui" },
-        { artist: "Jesús Adrián Romero", title: "Cantad Alegres" },
-        { artist: "Karina Moreno", title: "Enamorada de ti" },
-        { artist: "Marco Barrientos", title: "Hosanna" },
-        { artist: "Christine D'Clario", title: "Como Dijiste" },
-        { artist: "Marcos Witt", title: "Te Exaltamos" }
-      ];
-      
-      historyContainer.innerHTML = "";
-      
-      for (const song of testSongs) {
-        await createSongCard(song.artist, song.title, historyContainer);
-      }
+      historyContainer.innerHTML = `
+        <div class="no-data">
+          <img src="${fallbackCover}" alt="Sin datos">
+          <div>No hay historial disponible en este momento</div>
+          <div style="font-size: 0.8rem; margin-top: 10px; opacity: 0.7;">Intentando reconectar...</div>
+        </div>
+      `;
     }
     
-    // LIMPIAR TEXTO DE CARACTERES RAROS
     function cleanText(text) {
       if (!text) return '';
       return text
@@ -409,7 +443,6 @@
         .trim();
     }
     
-    // CREAR TARJETA DE CANCIÓN
     async function createSongCard(artist, title, container) {
       const cardDiv = document.createElement("div");
       cardDiv.className = "song-card";
