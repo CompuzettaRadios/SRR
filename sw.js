@@ -1,4 +1,4 @@
-const CACHE_VERSION = '2.1.0';
+const CACHE_VERSION = '2.1.3';
 const CACHE_NAME = `stereo-revelacion-v${CACHE_VERSION}`;
 
 // URLs para cachear - organizadas por prioridad
@@ -7,6 +7,16 @@ const urlsToCache = [
   './index.html',
   './historial.html', // 👈 LÍNEA AGREGADA
   './manifest.json',
+  './AppIcons/android/android-launchericon-48-48.png',
+  './AppIcons/android/android-launchericon-72-72.png',
+  './AppIcons/android/android-launchericon-96-96.png',
+  './AppIcons/android/android-launchericon-144-144.png',
+  './AppIcons/android/android-launchericon-192-192.png',
+  './AppIcons/android/android-launchericon-512-512.png',
+  './AppIcons/ios/120.png',
+  './AppIcons/ios/152.png',
+  './AppIcons/ios/167.png',
+  './AppIcons/ios/180.png',
   'https://code.jquery.com/jquery-3.2.1.min.js',
   'https://extassisnetwork.com/player/Luna/luna.js',
   'https://stereorevelacionradio.com/wp-content/uploads/2023/05/face-150x150.png',
@@ -390,3 +400,4 @@ self.addEventListener('unhandledrejection', function(event) {
   console.error('[SW] Promise rechazada:', event.reason);
   event.preventDefault();
 });
+
