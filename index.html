@@ -546,28 +546,33 @@ artwork: [
             }
         }
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            setTimeout(showInstallBanner, 5000);
-        });
+// AGREGAR AQUÍ EL PASO 4:
+function showFixedInstallButton() {
+    if (deferredPrompt) {
+        $('#installButtonFixed').addClass('show');
+    }
+}
 
-        window.addEventListener('appinstalled', () => {
-            console.log('PWA instalada exitosamente');
-            hideInstallBanner();
-            deferredPrompt = null;
-        });
+function hideFixedInstallButton() {
+    $('#installButtonFixed').removeClass('show');
+}
 
-        $('#installBanner').on('click', function(e) {
-            if (!e.target.classList.contains('close-btn')) {
-                installPWA();
-            }
-        });
+$('#installButtonFixed').on('click', installPWA);
 
-        $('#closeBanner').on('click', function(e) {
-            e.stopPropagation();
-            hideInstallBanner();
-        });
+// Modificar el evento existente:
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    setTimeout(showInstallBanner, 5000);
+    setTimeout(showFixedInstallButton, 2000);  // AGREGAR ESTA LÍNEA
+});
+
+window.addEventListener('appinstalled', () => {
+    console.log('PWA instalada exitosamente');
+    hideInstallBanner();
+    hideFixedInstallButton();  // AGREGAR ESTA LÍNEA
+    deferredPrompt = null;
+});
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -711,6 +716,7 @@ document.addEventListener('visibilitychange', () => {
     </script>
 </body>
 </html>
+
 
 
 
