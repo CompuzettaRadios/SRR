@@ -333,6 +333,39 @@
             align-items: center;
             justify-content: center;
         }
+.install-button-fixed {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: linear-gradient(135deg, #FFE000 0%, #FFA500 100%);
+  color: #000;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 224, 0, 0.5);
+  box-shadow: 0 2px 15px rgba(255, 224, 0, 0.3);
+  transition: all 0.3s ease;
+  display: none;
+}
+
+.install-button-fixed:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(255, 224, 0, 0.5);
+}
+
+.install-button-fixed.show {
+  display: block;
+}
+
+#extassisnetwork {
+  position: relative;
+}
+        
     </style>
 </head>
 
@@ -351,11 +384,12 @@
             <a href="https://www.stereorevelacionradio.com" target="_blank">
                 <img src="https://stereorevelacionradio.com/wp-content/uploads/2023/05/pagina-150x150.png" alt="Web">
             </a>
-        </div>
-        
-        <div id="extassisnetwork"></div>
     </div>
-    
+
+    <div id="extassisnetwork">
+        <button class="install-button-fixed" id="installButtonFixed">📱 Instalar App</button>
+    </div>
+</div>
     <div class="panel-overlay" id="panelOverlay"></div>
     
     <div id="toggleArrow">
@@ -677,6 +711,7 @@ document.addEventListener('visibilitychange', () => {
     </script>
 </body>
 </html>
+
 
 
 
