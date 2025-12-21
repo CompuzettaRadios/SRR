@@ -19,13 +19,13 @@ const urlsToCache = [
   './AppIcons/ios/180.png',
   'https://code.jquery.com/jquery-3.2.1.min.js',
   'https://extassisnetwork.com/player/Luna/luna.js',
-  'https://stereorevelacionradio.com/wp-content/uploads/2023/05/face-150x150.png',
-  'https://stereorevelacionradio.com/wp-content/uploads/2023/05/whstsapp-150x150.png',
-  'https://stereorevelacionradio.com/wp-content/uploads/2023/05/yt-150x150.png',
-  'https://stereorevelacionradio.com/wp-content/uploads/2023/05/pagina-150x150.png',
-  'https://stereorevelacionradio.com/wp-content/uploads/2022/12/logo-radio.png',
-  'https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png',
-  'https://stereorevelacionradio.com/wp-content/uploads/2025/08/logo-radio_Live.png'
+  './images/face-150x150.png',
+  './images/whstsapp-150x150.png',
+  './images/yt-150x150.png',
+  './images/pagina-150x150.png',
+  './images/logo-radio.png',
+  './images/023/05/logoSRR.png',
+  './images/logo-radio_Live.png'
 ];
 
 // URLs que NUNCA deben ser cacheadas
@@ -306,8 +306,8 @@ self.addEventListener('push', function(event) {
   
   let title = 'STEREO REVELACIÓN RADIO';
   let body = 'Nueva notificación de la radio';
-  let icon = 'https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png';
-  let badge = 'https://stereorevelacionradio.com/wp-content/uploads/2023/05/logoSRR.png';
+  let icon = './images/logoSRR.png';
+  let badge = './images/logoSRR.png';
   let data = {};
 
   if (event.data) {
@@ -400,4 +400,5 @@ self.addEventListener('unhandledrejection', function(event) {
   console.error('[SW] Promise rechazada:', event.reason);
   event.preventDefault();
 });
+
 
