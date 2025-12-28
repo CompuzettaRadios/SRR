@@ -406,7 +406,7 @@
     </div>
     
     <div class="schedule-panel" id="schedulePanel">
-        <h3></h3>
+        <h3>Historial Musical</h3>
         <iframe class="ads-frame" 
                 id="historialFrame"
                 loading="lazy"
@@ -547,62 +547,58 @@ artwork: [
             }
         }
 
-// AGREGAR AQUÍ EL BOTON INSTALAR
-function showFixedInstallButton() {
-    if (deferredPrompt) {
-        $('#installButtonFixed').addClass('show');
-    }
-}
+        function showFixedInstallButton() {
+            if (deferredPrompt) {
+                $('#installButtonFixed').addClass('show');
+            }
+        }
 
-function hideFixedInstallButton() {
-    $('#installButtonFixed').removeClass('show');
-}
+        function hideFixedInstallButton() {
+            $('#installButtonFixed').removeClass('show');
+        }
 
-$('#installButtonFixed').on('click', installPWA);
+        $('#installButtonFixed').on('click', installPWA);
 
-// Modificar el evento existente:
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    setTimeout(showInstallBanner, 5000);
-    setTimeout(showFixedInstallButton, 2000);  // AGREGAR ESTA LÍNEA
-});
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            setTimeout(showInstallBanner, 5000);
+            setTimeout(showFixedInstallButton, 2000);
+        });
 
-window.addEventListener('appinstalled', () => {
-    console.log('PWA instalada exitosamente');
-    hideInstallBanner();
-    hideFixedInstallButton();  // AGREGAR ESTA LÍNEA
-    deferredPrompt = null;
-});
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA instalada exitosamente');
+            hideInstallBanner();
+            hideFixedInstallButton();
+            deferredPrompt = null;
+        });
 
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js?v=' + APP_VERSION)
-            .then((registration) => {
-                console.log('SW registrado:', registration);
-                
-                // Forzar actualización cuando hay nuevo SW disponible
-                registration.addEventListener('updatefound', () => {
-                    const newWorker = registration.installing;
-                    newWorker.addEventListener('statechange', () => {
-                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            console.log('Nuevo SW instalado, recargando página...');
-                            window.location.reload();
-                        }
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js?v=' + APP_VERSION)
+                    .then((registration) => {
+                        console.log('SW registrado:', registration);
+                        
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('Nuevo SW instalado, recargando página...');
+                                    window.location.reload();
+                                }
+                            });
+                        });
+                        
+                        registration.update();
+                    })
+                    .catch((err) => {
+                        console.log('SW error:', err);
                     });
-                });
-                
-                // También verificar actualizaciones manualmente
-                registration.update();
-            })
-            .catch((err) => {
-                console.log('SW error:', err);
             });
-    });
-}
+        }
 
-document.addEventListener('visibilitychange', () => {
-    if (document.hidden && isConnected) {
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && isConnected) {
                 showBackgroundNotification();
                 if (audioContext && audioContext.state === 'suspended') {
                     audioContext.resume();
@@ -617,7 +613,7 @@ document.addEventListener('visibilitychange', () => {
             const iframe = document.getElementById('historialFrame');
             if (!iframe || iframe.src) return;
             
-            const historialUrl = './historial.html?v=' + Date.now();
+            const historialUrl = 'https://stereorevelacionradio.com/SRR/historial.html?v=' + Date.now();
             
             iframe.onload = function() {
                 console.log('Historial cargado exitosamente');
@@ -717,11 +713,3 @@ document.addEventListener('visibilitychange', () => {
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
