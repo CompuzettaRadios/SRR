@@ -637,7 +637,8 @@ artwork: [
                 );
         }
 
-       $(document).ready(function() {
+      <script>
+$(document).ready(function() {
     $("#extassisnetwork").lunaradio({
         // 1. Audio Directo
         streamurl: "https://radiostreaming.pro/8404/stream",
@@ -676,59 +677,33 @@ artwork: [
         autoplay: "true"
     });
 
-    // FUNCIÓN PARA INYECTAR EL TÍTULO DIRECTAMENTE EN EL ELEMENTO DE LUNARADIO
-    function actualizarTituloSpan() {
-        fetch("https://radiostreaming.pro:7201/stats?sid=1&json=1")
-            .then(res => res.json())
-            .then(data => {
-                if (data && data.songtitle) {
-                    $(".extassisnetworkextradionamespan").text(data.songtitle);
-                }
-            })
-            .catch(err => console.error("Error al actualizar título:", err));
-    }
+    // EVENTOS Y MANTENIMIENTO DE AUDIO
+    setInterval(() => {
+        if (typeof isConnected !== 'undefined' && isConnected && typeof audioContext !== 'undefined' && audioContext && audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+    }, 30000);
 
-    // Ejecutar inmediatamente y repetir cada 8 segundos
-    actualizarTituloSpan();
-    setInterval(actualizarTituloSpan, 8000);
+    window.addEventListener('beforeunload', () => { 
+        if (typeof releaseWakeLock === 'function') releaseWakeLock(); 
+    });
+    
+    window.addEventListener('focus', () => {
+        if (typeof isConnected !== 'undefined' && isConnected && typeof audioContext !== 'undefined' && audioContext && audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+    });
+
+    /* BLOQUEO DESACTIVADO TEMPORALMENTE PARA PRUEBAS
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'F12') event.preventDefault();
+    });
+
+    document.addEventListener('contextmenu', function(event) {
+        event.preventDefault();
+    });
+    */
 });
-    // Función que inyecta la canción dentro del texto principal del reproductor
-    function obtenerTituloLuna() {
-        fetch("https://radiostreaming.pro:7201/stats?sid=1&json=1")
-            .then(res => res.json())
-            .then(data => {
-                if (data && data.songtitle) {
-                    // Reemplaza el texto en la interfaz visual de LunaRadio
-                    $(".luna-songtitle, .luna-radioname, #extassisnetwork .title").text(data.songtitle);
-                }
-            })
-            .catch(err => console.error(err));
-    }
-
-    // Consultar cada 10 segundos
-    setInterval(obtenerTituloLuna, 10000);
-});    
-        
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'F12') event.preventDefault();
-        });
-
-        document.addEventListener('contextmenu', function(event) {
-            event.preventDefault();
-        });
-
-        setInterval(() => {
-            if (isConnected && audioContext && audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
-        }, 30000);
-
-        window.addEventListener('beforeunload', () => { releaseWakeLock(); });
-        window.addEventListener('focus', () => {
-            if (isConnected && audioContext && audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
-        });
-    </script>
+</script>
 </body>
 </html>
