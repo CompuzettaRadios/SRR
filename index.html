@@ -637,73 +637,78 @@ artwork: [
                 );
         }
 
-      <script>
-$(document).ready(function() {
-    $("#extassisnetwork").lunaradio({
-        // 1. Audio Directo
-        streamurl: "https://radiostreaming.pro/8404/stream",
-        radioname: "STEREO REVELACIÓN RADIO",
+              $(document).ready(function() {
+            $("#extassisnetwork").lunaradio({
+                streamurl: "https://cast6.my-control-panel.com/proxy/manrique/",
+                radioname: "STEREO REVELACIÓN RADIO",
+                coverimage: "https://stereorevelacionradio.com/images/logo.png",
+                onlycoverimage: false,
+                fallbackcover: "https://stereorevelacionradio.com/images/logo.png",
+                userinterface: "big",
+                backgroundcolor: "#1a0d2e",
+                fontcolor: "#FFFFFF",
+                hightlightcolor: "#FFE000",
+                fontname: "Segoe UI",
+                scroll: "true",
+                coverstyle: "animated",
+                usevisualizer: "real",
+                visualizertype: "6",
+                multicolorvisualizer: "true",
+                color1: "#FF6B35",
+                color2: "#F7931E", 
+                color3: "#FFD700",
+                color4: "#32CD32",
+                color5: "#00CED1",
+                color6: "#9A4FD4",
+                visualizercolor: "#FFE000",
+                streamtype: "shoutcast2",
+                shoutcastpath: "/stream",
+                shoutcastid: "1",
+                volume: "90",
+                autoplay: "true",
+                usestreamcorsproxy: "true",
+                
+                onPlay: function() {
+                    isConnected = true;
+                    initAudioContext();
+                    setupMediaSession();
+                    requestWakeLock();
+                },
+                onStop: function() {
+                    isConnected = false;
+                    releaseWakeLock();
+                    if ('mediaSession' in navigator) {
+                        navigator.mediaSession.playbackState = 'paused';
+                    }
+                },
+                onError: function() {
+                    isConnected = false;
+                    releaseWakeLock();
+                    if ('mediaSession' in navigator) {
+                        navigator.mediaSession.playbackState = 'paused';
+                    }
+                }
+            });
+        });
         
-        // 2. Metadatos
-        streamtype: "other",
-        songtitleurl: "https://radiostreaming.pro:7201/stats?sid=1&json=1",
-        usestreamcorsproxy: "true",
-        
-        // 3. Logo
-        coverimage: "https://stereorevelacionradio.com/SRR/images/logo-radio.png",
-        onlycoverimage: false,
-        fallbackcover: "https://stereorevelacionradio.com/SRR/images/logo-radio.png",
-        
-        // INTERFAZ
-        userinterface: "big",
-        backgroundcolor: "#1a0d2e",
-        fontcolor: "#FFFFFF",
-        hightlightcolor: "#FFE000",
-        fontname: "Segoe UI",
-        scroll: "true",
-        coverstyle: "animated",
-        usevisualizer: "real",
-        visualizertype: "6",
-        multicolorvisualizer: "true",
-        color1: "#FF6B35",
-        color2: "#F7931E", 
-        color3: "#FFD700",
-        color4: "#32CD32",
-        color5: "#00CED1",
-        color6: "#9A4FD4",
-        visualizercolor: "#FFE000",
-        
-        volume: "90",
-        autoplay: "true"
-    });
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'F12') event.preventDefault();
+        });
 
-    // EVENTOS Y MANTENIMIENTO DE AUDIO
-    setInterval(() => {
-        if (typeof isConnected !== 'undefined' && isConnected && typeof audioContext !== 'undefined' && audioContext && audioContext.state === 'suspended') {
-            audioContext.resume();
-        }
-    }, 30000);
+        document.addEventListener('contextmenu', function(event) {
+            event.preventDefault();
+        });
 
-    window.addEventListener('beforeunload', () => { 
-        if (typeof releaseWakeLock === 'function') releaseWakeLock(); 
-    });
-    
-    window.addEventListener('focus', () => {
-        if (typeof isConnected !== 'undefined' && isConnected && typeof audioContext !== 'undefined' && audioContext && audioContext.state === 'suspended') {
-            audioContext.resume();
-        }
-    });
+        setInterval(() => {
+            if (isConnected && audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }, 30000);
 
-    /* BLOQUEO DESACTIVADO TEMPORALMENTE PARA PRUEBAS
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'F12') event.preventDefault();
-    });
-
-    document.addEventListener('contextmenu', function(event) {
-        event.preventDefault();
-    });
-    */
-});
-</script>
-</body>
-</html>
+        window.addEventListener('beforeunload', () => { releaseWakeLock(); });
+        window.addEventListener('focus', () => {
+            if (isConnected && audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        });
+    </script>
