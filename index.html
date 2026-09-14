@@ -639,22 +639,21 @@ artwork: [
 
        $(document).ready(function() {
     $("#extassisnetwork").lunaradio({
-        // 1. AUDIO DIRECTO (Garantiza reproducción sin cortes)
+        // 1. AUDIO DIRECTO (Garantiza reproducción continua)
         streamurl: "https://radiostreaming.pro/8404/stream",
         radioname: "STEREO REVELACIÓN RADIO",
         
-        // 2. METADATOS DE SHOUTCAST 2.5 (Lee el título de la canción)
-        streamtype: "shoutcast2",
-        shoutcaststreamid: "1",
-        metadataproxyurl: "https://radiostreaming.pro:7201/stats?sid=1&json=1",
+        // 2. METADATOS VÍA JSON DIRECTO (Evita el fallo del Service Worker sw.js)
+        streamtype: "other",
+        songtitleurl: "https://radiostreaming.pro:7201/stats?sid=1&json=1",
         usestreamcorsproxy: "true",
         
-        // 3. LOGO Y TEXTO (DESACTIVAR onlycoverimage PARA MOSTRAR TÍTULOS)
+        // 3. LOGO Y MOSTRAR TÍTULOS
         coverimage: "https://stereorevelacionradio.com/SRR/images/logo-radio.png",
-        onlycoverimage: false, // <-- CAMBIADO A FALSE PARA QUE SE VEA EL TÍTULO
+        onlycoverimage: false,
         fallbackcover: "https://stereorevelacionradio.com/SRR/images/logo-radio.png",
         
-        // INTERFAZ Y ESTILOS
+        // INTERFAZ Y VISUALIZADOR
         userinterface: "big",
         backgroundcolor: "#1a0d2e",
         fontcolor: "#FFFFFF",
@@ -674,22 +673,7 @@ artwork: [
         visualizercolor: "#FFE000",
         
         volume: "90",
-        autoplay: "true",
-        
-        onPlay: function() {
-            isConnected = true;
-            initAudioContext();
-            setupMediaSession();
-            requestWakeLock();
-        },
-        onStop: function() {
-            isConnected = false;
-            releaseWakeLock();
-        },
-        onError: function() {
-            isConnected = false;
-            releaseWakeLock();
-        }
+        autoplay: "true"
     });
 });
     
