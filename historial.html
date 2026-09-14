@@ -324,13 +324,16 @@
         `;
       }
       
-      // Usamos el proxy AllOrigins para evitar bloqueos de CORS del navegador
+            // Usamos el proxy AllOrigins para evitar bloqueos de CORS del navegador
       const proxy = "https://api.allorigins.win/get?url=";
-      // API JSON oficial de tu cuenta en SonicPanel para leer canciones jugadas
+      
+      // API JSON oficial de tu cuenta en SonicPanel para leer canciones jugadas (ACTUALIZADO PRO)
       const targetUrl = "https://radiostreaming.pro";
+      
       const proxyUrl = proxy + encodeURIComponent(targetUrl);
       
       try {
+
         console.log(`[HISTORIAL] Consultando API de SonicPanel...`);
         const res = await fetch(proxyUrl);
         const data = await res.json();
