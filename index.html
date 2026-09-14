@@ -643,16 +643,17 @@ artwork: [
         streamurl: "https://radiostreaming.pro/8404/stream",
         radioname: "STEREO REVELACIÓN RADIO",
         
-        // 2. Metadatos procesados con Proxy HTTPS
+        // 2. Metadatos
         streamtype: "other",
-        songtitleurl: "https://corsproxy.io/?" + encodeURIComponent("https://radiostreaming.pro:7201/stats?sid=1&json=1"),
+        songtitleurl: "https://radiostreaming.pro:7201/stats?sid=1&json=1",
+        usestreamcorsproxy: "true",
         
-        // 3. Logo y visualización de títulos
+        // 3. Logo
         coverimage: "https://stereorevelacionradio.com/SRR/images/logo-radio.png",
         onlycoverimage: false,
         fallbackcover: "https://stereorevelacionradio.com/SRR/images/logo-radio.png",
         
-        // Interfaz y visualizador
+        // INTERFAZ Y ESTILOS
         userinterface: "big",
         backgroundcolor: "#1a0d2e",
         fontcolor: "#FFFFFF",
@@ -672,8 +673,35 @@ artwork: [
         visualizercolor: "#FFE000",
         
         volume: "90",
-        autoplay: "true"
+        autoplay: "true",
+        
+        // ACTUALIZACIÓN DIRECTA DEL TÍTULO EN LUNARADIO
+        onPlay: function() {
+            isConnected = true;
+            initAudioContext();
+            setupMediaSession();
+            requestWakeLock();
+            
+            // Iniciar consulta de título al dar Play
+            obtenerTituloLuna();
+        }
     });
+
+    // Función que inyecta la canción dentro del texto principal del reproductor
+    function obtenerTituloLuna() {
+        fetch("https://radiostreaming.pro:7201/stats?sid=1&json=1")
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.songtitle) {
+                    // Reemplaza el texto en la interfaz visual de LunaRadio
+                    $(".luna-songtitle, .luna-radioname, #extassisnetwork .title").text(data.songtitle);
+                }
+            })
+            .catch(err => console.error(err));
+    }
+
+    // Consultar cada 10 segundos
+    setInterval(obtenerTituloLuna, 10000);
 });    
         
         document.addEventListener('keydown', function(event) {
