@@ -639,24 +639,22 @@ artwork: [
 
        $(document).ready(function() {
     $("#extassisnetwork").lunaradio({
-        // 1. Audio directo limpia (reproducción garantizada)
+        // 1. Audio directo garantizado
         streamurl: "https://radiostreaming.pro/8404/stream",
         radioname: "STEREO REVELACIÓN RADIO",
         
-        // 2. Metadatos nativos para SonicPanel / Shoutcast
+        // 2. Metadatos nativos usando el proxy del endpoint exacto de tu SonicPanel
         streamtype: "shoutcast2",
         shoutcaststreamid: "1",
-        songtitleurl: "https://radiostreaming.pro:7201/7.html?sid=1",
-        metadataproxyurl: "https://radiostreaming.pro:7201/stats?sid=1&json=1",
+        metadataproxyurl: "https://radiostreaming.pro:7201/cp/get_info.php?p=8404",
         usestreamcorsproxy: "true",
-        corsproxy: "https://corsproxy.io/?",
         
-        // 3. Logo fijo de la radio
+        // 3. Logo fijo
         coverimage: "https://stereorevelacionradio.com/SRR/images/logo-radio.png",
         onlycoverimage: true, 
         fallbackcover: "https://stereorevelacionradio.com/SRR/images/logo-radio.png",
         
-        // Interfaz y estilos
+        // Interfaz y visualizador
         userinterface: "big",
         backgroundcolor: "#1a0d2e",
         fontcolor: "#FFFFFF",
