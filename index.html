@@ -693,19 +693,13 @@ artwork: [
                 }
             });
 
-            // OBTENER TÍTULO CON PROXY ACTIVO (SIN ERROR 403)
+            // API NATIVA HTTPS DE SONICPANEL (Evita bloqueo de puerto 7201 y CORS)
             function obtenerTituloSonic() {
-                var targetUrl = "https://radiostreaming.pro:7201/stats?sid=1&json=1";
-                var proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(targetUrl);
-
-                $.getJSON(proxyUrl, function(data) {
-                    if (data && data.contents) {
-                        try {
-                            var jsonResponse = JSON.parse(data.contents);
-                            if (jsonResponse.songtitle) {
-                                $("#extassisnetworktexttitlespan, .extassisnetworktexttitlespan").text(jsonResponse.songtitle);
-                            }
-                        } catch(e) {}
+                $.getJSON("https://radiostreaming.pro/cp/get_info.php?p=8404", function(data) {
+                    if (data && data.title) {
+                        $("#extassisnetworktexttitlespan, .extassisnetworktexttitlespan").text(data.title);
+                    } else if (data && data.song) {
+                        $("#extassisnetworktexttitlespan, .extassisnetworktexttitlespan").text(data.song);
                     }
                 });
             }
@@ -713,6 +707,8 @@ artwork: [
             obtenerTituloSonic();
             setInterval(obtenerTituloSonic, 10000);
         });
+
+        
 
         
 
