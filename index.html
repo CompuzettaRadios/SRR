@@ -637,14 +637,17 @@ artwork: [
                 );
         }
 
-              <script>
-        $(document).ready(function() {
+                   $(document).ready(function() {
             $("#extassisnetwork").lunaradio({
-                streamurl: "https://radiostreaming.pro/8404/stream",
+                // 1. Tu nueva URL SSL nativa de transmisión PRO
+                streamurl: "https://radiostreaming.pro:7201",
                 radioname: "STEREO REVELACIÓN RADIO",
-                coverimage: "https://stereorevelacionradio.com/images/logo.png",
-                onlycoverimage: false,
-                fallbackcover: "https://stereorevelacionradio.com/images/logo.png",
+                
+                // PROTECCIÓN CRISTIANA: Forzamos a que SOLO se use tu logo oficial
+                coverimage: "https://stereorevelacionradio.com",
+                onlycoverimage: true, // 👈 Bloquea carátulas automáticas/sexuales de SonicPanel
+                fallbackcover: "https://stereorevelacionradio.com",
+                
                 userinterface: "big",
                 backgroundcolor: "#1a0d2e",
                 fontcolor: "#FFFFFF",
@@ -663,14 +666,13 @@ artwork: [
                 color6: "#9A4FD4",
                 visualizercolor: "#FFE000",
                 
-                // --- CONFIGURACIÓN PARA SONICPANEL ---
+                // 2. Parámetros del motor IceCast PRO
                 streamtype: "icecast2",
-                songtitleurl: "https://corsproxy.io/?" + encodeURIComponent("https://radiostreaming.pro:7201/stats?sid=1&json=1"),
-                usestreamcorsproxy: "true",
-                // -------------------------------------
-
+                icecastmountpoint: "/stream",
+                
                 volume: "90",
                 autoplay: "true",
+                usestreamcorsproxy: "false", 
                 
                 onPlay: function() {
                     isConnected = true;
@@ -694,6 +696,7 @@ artwork: [
                 }
             });
         });
+
         
         document.addEventListener('keydown', function(event) {
             if (event.key === 'F12') event.preventDefault();
@@ -716,5 +719,5 @@ artwork: [
             }
         });
     </script>
-    </body>
+</body>
 </html>
