@@ -638,13 +638,12 @@ artwork: [
         }
 
 
+
         $(document).ready(function() {
             $("#extassisnetwork").lunaradio({
-                // 1. Audio Directo por el stream nativo
                 streamurl: "https://radiostreaming.pro/8404/stream",
                 radioname: "STEREO REVELACIÓN RADIO",
                 
-                // 2. Logo oficial con ruta completa (.png)
                 coverimage: "https://stereorevelacionradio.com/SRR/images/logo-radio.png",
                 onlycoverimage: false,
                 fallbackcover: "https://stereorevelacionradio.com/SRR/images/logo-radio.png",
@@ -667,12 +666,10 @@ artwork: [
                 color6: "#9A4FD4",
                 visualizercolor: "#FFE000",
                 
-                // 3. Desactivar lectura Icecast por puerto para evitar TIMED_OUT
                 streamtype: "other",
-                
                 volume: "90",
                 autoplay: "true",
-                usestreamcorsproxy: "false", 
+                usestreamcorsproxy: "false",
                 
                 onPlay: function() {
                     isConnected = true;
@@ -696,27 +693,24 @@ artwork: [
                 }
             });
 
-            // LECTURA DIRECTA DE SONICPANEL (Obtiene el título usando el endpoint activo de tu panel)
-            function actualizarTituloSonic() {
-                fetch("https://radiostreaming.pro:7201/cp/get_info.php?p=8404")
-                    .then(res => res.json())
-                    .then(data => {
-                        // SonicPanel devuelve el título en la propiedad title o song
-                        var cancion = data.title || data.song || data.title_full;
-                        if (cancion) {
-                            $("#extassisnetworkextrasongspan, .extassisnetworkextrasongspan, #extassisnetworksongtitle").text(cancion);
+            // LECTURA DIRECTA DE METADATOS DE SONICPANEL
+            function obtenerTituloSonic() {
+                $.getJSON("https://corsproxy.io/?" + encodeURIComponent("https://radiostreaming.pro:7201/stats?sid=1&json=1"))
+                    .done(function(data) {
+                        if (data && data.songtitle) {
+                            $("#extassisnetworktexttitlespan, .extassisnetworktexttitlespan").text(data.songtitle);
                         }
-                    })
-                    .catch(err => console.log("Esperando metadatos de SonicPanel..."));
+                    });
             }
 
-            actualizarTituloSonic();
-            setInterval(actualizarTituloSonic, 10000);
+            obtenerTituloSonic();
+            setInterval(obtenerTituloSonic, 10000);
         });
 
 
-
         
+
+
         
         document.addEventListener('keydown', function(event) {
             if (event.key === 'F12') event.preventDefault();
