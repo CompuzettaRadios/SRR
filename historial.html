@@ -307,7 +307,7 @@
     let retryCount = 0;
     const maxRetries = 3;
 
-        // FUNCIÓN PRINCIPAL ADAPTADA PARA SONICPANEL (API JSON)
+    // FUNCIÓN PRINCIPAL ADAPTADA PARA SONICPANEL (API NATIVA HTTPS)
     async function fetchHistory() {
       if (isLoading) return;
       
@@ -324,48 +324,27 @@
         `;
       }
       
-            // Usamos el proxy AllOrigins para evitar bloqueos de CORS del navegador
-      const proxy = "https://api.allorigins.win/get?url=";
-      
-      // API JSON oficial de tu cuenta en SonicPanel para leer canciones jugadas (ACTUALIZADO PRO)
-      const targetUrl = "https://radiostreaming.pro";
-      
-      const proxyUrl = proxy + encodeURIComponent(targetUrl);
+      // Endpoint nativo de SonicPanel para consultar canciones recientes (sin bloqueo CORS ni proxy)
+      const targetUrl = "https://radiostreaming.pro/cp/get_history.php?p=8404&_=" + Date.now();
       
       try {
-
         console.log(`[HISTORIAL] Consultando API de SonicPanel...`);
-        const res = await fetch(proxyUrl);
-        const data = await res.json();
+        const res = await fetch(targetUrl);
+        const jsonData = await res.json();
         
-        // Conversión del formato JSON a objeto legible
-        let jsonData = typeof data.contents === 'string' ? JSON.parse(data.contents) : data.contents;
-        
-        if (jsonData && Array.isArray(jsonData)) {
-          console.log(`[HISTORIAL] ✓ Datos JSON obtenidos de forma exitosa!`);
-          await parseHistory(jsonData);
+        if (jsonData && (Array.isArray(jsonData) || typeof jsonData === 'object')) {
+          console.log(`[HISTORIAL] ✓ Datos obtenidos de forma exitosa!`);
+          
+          // Convertir a Array en caso de que SonicPanel responda un objeto indexado
+          const historyArray = Array.isArray(jsonData) ? jsonData : Object.values(jsonData);
+          
+          await parseHistory(historyArray);
           retryCount = 0;
           isLoading = false;
           return;
         }
       } catch (error) {
-        console.log(`[HISTORIAL] ✗ Error consultando la API:`, error.message);
-      }
-      
-      // FALLBACK SI LA API DA ERROR: Intentar sin el puerto por el proxy seguro del panel
-      try {
-        const fallbackUrl = proxy + encodeURIComponent("https://radiostreaming.pro");
-        const res = await fetch(fallbackUrl);
-        const data = await res.json();
-        let jsonData = typeof data.contents === 'string' ? JSON.parse(data.contents) : data.contents;
-        
-        if (jsonData && Array.isArray(jsonData)) {
-          await parseHistory(jsonData);
-          isLoading = false;
-          return;
-        }
-      } catch (err) {
-        console.log(`[HISTORIAL] Fallback también falló`);
+        console.log(`[HISTORIAL] ✗ Error consultando la API nativa:`, error.message);
       }
       
       console.log("[HISTORIAL] No se pudieron obtener datos del servidor");
@@ -373,7 +352,7 @@
       isLoading = false;
     }
 
-        // PARSEAR EL JSON DEL HISTORIAL DE SONICPANEL
+    // PARSEAR EL JSON DEL HISTORIAL DE SONICPANEL
     async function parseHistory(jsonData) {
       const historyContainer = document.getElementById("history");
       historyContainer.innerHTML = "";
@@ -382,11 +361,10 @@
       const songsToShow = [];
       
       try {
-        // SonicPanel entrega una lista JSON donde cada objeto tiene la propiedad "title" (ej: "Artista - Cancion")
         if (jsonData && jsonData.length > 0) {
           for (const item of jsonData) {
-            // Extraemos la propiedad 'title' que contiene la cadena completa de la canción
-            const rawSongText = item.title || item.song || "";
+            // Extraer la propiedad del título de la canción devuelta por SonicPanel
+            const rawSongText = item.title || item.song || item.songtitle || (typeof item === 'string' ? item : "");
             
             if (rawSongText) {
               const songInfo = parseSongInfo(rawSongText);
@@ -394,7 +372,6 @@
                 uniqueSongs.add(songInfo.key);
                 songsToShow.push(songInfo);
                 
-                // Mantenemos tu límite original para aprovechar el grid
                 if (songsToShow.length >= 24) break; 
               }
             }
@@ -403,12 +380,10 @@
         
         // MOSTRAR RESULTADOS
         if (songsToShow.length > 0) {
-          console.log(`[HISTORIAL] ${songsToShow.length} canciones procesadas para el panel`);
+          console.log(`[HISTORIAL] ${songsToShow.length} canciones procesadas`);
           for (const song of songsToShow) {
-            // Inyectamos artista y título directo a tus funciones originales de tarjetas
             await createSongCard(song.artist, song.title, historyContainer);
           }
-          // Guardamos marca de tiempo para tu optimización de visibilidad
           localStorage.setItem('lastHistoryUpdate', Date.now().toString());
         } else {
           showNoDataMessage();
@@ -419,8 +394,8 @@
         showErrorMessage();
       }
     }
-    
-    // PARSEAR INFORMACIÓN DE LA CANCIÓN (Mantenemos tus filtros inteligentes originales)
+
+    // PARSEAR INFORMACIÓN DE LA CANCIÓN
     function parseSongInfo(songText) {
       if (!songText || 
           songText.includes('Current Song') || 
@@ -447,7 +422,7 @@
       return null;
     }
     
-    // LIMPIAR TEXTO (Queda idéntico)
+    // LIMPIAR TEXTO
     function cleanText(text) {
       if (!text) return '';
       return text
@@ -456,7 +431,7 @@
         .trim();
     }
     
-    // CREAR CARD DE CANCIÓN (Queda idéntico)
+    // CREAR CARD DE CANCIÓN
     async function createSongCard(artist, title, container) {
       const cardDiv = document.createElement("div");
       cardDiv.className = "song-card";
@@ -486,14 +461,14 @@
       };
     }
     
-    // OBTENER CARÁTULA REAL DESDE ITUNES (Queda idéntico)
+    // OBTENER CARÁTULA REAL DESDE ITUNES
     async function fetchRealCover(artist, title) {
       const cacheKey = `${artist}-${title}`;
       
       if (coverCache.has(cacheKey)) {
         return coverCache.get(cacheKey);
       }
-      
+
       try {
         const query = `${artist} ${title}`.substring(0, 100);
         const response = await fetch(
@@ -515,7 +490,7 @@
       return fallbackCover;
     }
     
-    // MOSTRAR MENSAJE SIN DATOS (Queda idéntico)
+    // MOSTRAR MENSAJE SIN DATOS
     function showNoDataMessage() {
       const historyContainer = document.getElementById("history");
       historyContainer.innerHTML = `
@@ -532,7 +507,7 @@
       `;
     }
     
-    // MOSTRAR MENSAJE DE ERROR (Queda idéntico)
+    // MOSTRAR MENSAJE DE ERROR
     function showErrorMessage() {
       const historyContainer = document.getElementById("history");
       historyContainer.innerHTML = `
@@ -548,7 +523,7 @@
       `;
     }
     
-    // REINTENTAR FETCH (Queda idéntico)
+    // REINTENTAR FETCH
     function retryFetch() {
       if (retryCount < maxRetries) {
         retryCount++;
@@ -558,7 +533,7 @@
       }
     }
     
-    // INICIALIZACIÓN (Queda idéntico)
+    // INICIALIZACIÓN
     document.addEventListener('DOMContentLoaded', function() {
       console.log("[HISTORIAL] Página cargada, iniciando...");
       fetchHistory();
@@ -571,7 +546,7 @@
       }, 180000); 
     });
     
-    // MANEJO DE VISIBILIDAD (Queda idéntico)
+    // MANEJO DE VISIBILIDAD
     document.addEventListener('visibilitychange', function() {
       if (!document.hidden && !isLoading) {
         const lastUpdate = localStorage.getItem('lastHistoryUpdate');
@@ -582,7 +557,6 @@
         }
       }
     });
-    
   </script>
 </body>
 </html>
