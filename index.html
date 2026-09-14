@@ -643,10 +643,18 @@ artwork: [
                 streamurl: "https://radiostreaming.pro:7201",
                 radioname: "STEREO REVELACIÓN RADIO",
                 
-                // PROTECCIÓN CRISTIANA: Forzamos a que SOLO se use tu logo oficial
+                // 1. Desactivamos el bloqueo total para permitir que el TEXTO fluya en vivo
+                onlycoverimage: false, 
+                
+                // 2. Protegemos el fondo configurando tu logo oficial como carátula obligatoria por defecto
                 coverimage: "https://stereorevelacionradio.com",
-                onlycoverimage: true, // 👈 Bloquea carátulas automáticas/sexuales de SonicPanel
                 fallbackcover: "https://stereorevelacionradio.com",
+                
+                // 3. LA CLAVE DE PROTECCIÓN: Apagamos el lector automático de portadas externas de la librería
+                // Al dejar esto en blanco o falso, LunaRadio nunca irá a buscar fotos a iTunes ni Google.
+                // Al no encontrar foto externa, usará OBLIGATORIAMENTE tu 'fallbackcover' (tu logo).
+                coverstyle: "square", 
+
                 
                 userinterface: "big",
                 backgroundcolor: "#1a0d2e",
