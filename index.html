@@ -637,24 +637,16 @@ artwork: [
                 );
         }
 
-                   $(document).ready(function() {
+        $(document).ready(function() {
             $("#extassisnetwork").lunaradio({
-                // 1. Tu nueva URL SSL nativa de transmisión PRO
-                streamurl: "https://radiostreaming.pro:7201",
+                // Usamos la URL de transmisión directa PRO sin puerto para evitar bloqueos del navegador
+                streamurl: "https://radiostreaming.pro/8404/stream",
                 radioname: "STEREO REVELACIÓN RADIO",
                 
-                // 1. Desactivamos el bloqueo total para permitir que el TEXTO fluya en vivo
-                onlycoverimage: false, 
-                
-                // 2. Protegemos el fondo configurando tu logo oficial como carátula obligatoria por defecto
+                // Mantenemos tu logo cristiano 100% fijo y protegido
                 coverimage: "https://stereorevelacionradio.com",
+                onlycoverimage: true, 
                 fallbackcover: "https://stereorevelacionradio.com",
-                
-                // 3. LA CLAVE DE PROTECCIÓN: Apagamos el lector automático de portadas externas de la librería
-                // Al dejar esto en blanco o falso, LunaRadio nunca irá a buscar fotos a iTunes ni Google.
-                // Al no encontrar foto externa, usará OBLIGATORIAMENTE tu 'fallbackcover' (tu logo).
-                coverstyle: "square", 
-
                 
                 userinterface: "big",
                 backgroundcolor: "#1a0d2e",
@@ -674,9 +666,9 @@ artwork: [
                 color6: "#9A4FD4",
                 visualizercolor: "#FFE000",
                 
-                // 2. Parámetros del motor IceCast PRO
-                streamtype: "icecast2",
-                icecastmountpoint: "/stream",
+                // Cambiamos temporalmente a formato genérico "mp3" para obligar a LunaRadio
+                // a pintar la información del flujo nativo sin depender de la API interna
+                streamtype: "mp3",
                 
                 volume: "90",
                 autoplay: "true",
@@ -691,16 +683,10 @@ artwork: [
                 onStop: function() {
                     isConnected = false;
                     releaseWakeLock();
-                    if ('mediaSession' in navigator) {
-                        navigator.mediaSession.playbackState = 'paused';
-                    }
                 },
                 onError: function() {
                     isConnected = false;
                     releaseWakeLock();
-                    if ('mediaSession' in navigator) {
-                        navigator.mediaSession.playbackState = 'paused';
-                    }
                 }
             });
         });
