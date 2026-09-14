@@ -639,21 +639,21 @@ artwork: [
 
        $(document).ready(function() {
     $("#extassisnetwork").lunaradio({
-        // 1. URL de audio directa (garantiza la reproducción)
+        // 1. AUDIO (Se mantiene funcionando)
         streamurl: "https://radiostreaming.pro/8404/stream",
         radioname: "STEREO REVELACIÓN RADIO",
         
-        // 2. LECTURA DE METADATOS VÍA API DE SONICPANEL
+        // 2. TÍTULOS Y ARTISTA VÍA API DE SONICPANEL
         streamtype: "other",
-        songtitleurl: "https://radiostreaming.pro:7201/7.html",
+        songtitleurl: "https://radiostreaming.pro:7200/7.html",
         usestreamcorsproxy: "true",
         
-        // 3. LOGO DE LA RADIO
+        // 3. LOGO DE TU RADIO
         coverimage: "https://stereorevelacionradio.com/SRR/images/logo-radio.png",
         onlycoverimage: true, 
         fallbackcover: "https://stereorevelacionradio.com/SRR/images/logo-radio.png",
         
-        // INTERFAZ Y ESTILOS
+        // Interfaz y visualizador
         userinterface: "big",
         backgroundcolor: "#1a0d2e",
         fontcolor: "#FFFFFF",
