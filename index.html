@@ -637,13 +637,14 @@ artwork: [
                 );
         }
 
-        $(document).ready(function() {
+                $(document).ready(function() {
             $("#extassisnetwork").lunaradio({
-                streamurl: "https://radiostreaming.pro:7164/stream",
+                // 1. Ponemos tu nuevo enlace seguro IceCast de SonicPanel
+                streamurl: "https://radiostreaming.pro",
                 radioname: "STEREO REVELACIÓN RADIO",
-                coverimage: "https://stereorevelacionradio.com/images/logo.png",
+                coverimage: "https://stereorevelacionradio.com",
                 onlycoverimage: false,
-                fallbackcover: "https://stereorevelacionradio.com/images/logo.png",
+                fallbackcover: "https://stereorevelacionradio.com",
                 userinterface: "big",
                 backgroundcolor: "#1a0d2e",
                 fontcolor: "#FFFFFF",
@@ -661,9 +662,13 @@ artwork: [
                 color5: "#00CED1",
                 color6: "#9A4FD4",
                 visualizercolor: "#FFE000",
-                streamtype: "shoutcast2",
-                shoutcastpath: "/stream",
-                shoutcastid: "1",
+                
+                // 2. Cambiamos el tipo de servidor a IceCast
+                streamtype: "icecast2",
+                
+                // 3. Definimos el punto de montaje obligatorio de SonicPanel
+                icecastmountpoint: "/stream",
+                
                 volume: "90",
                 autoplay: "true",
                 usestreamcorsproxy: "true",
@@ -690,6 +695,7 @@ artwork: [
                 }
             });
         });
+
         
         document.addEventListener('keydown', function(event) {
             if (event.key === 'F12') event.preventDefault();
