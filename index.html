@@ -653,7 +653,7 @@ artwork: [
         onlycoverimage: false,
         fallbackcover: "https://stereorevelacionradio.com/SRR/images/logo-radio.png",
         
-        // INTERFAZ Y ESTILOS
+        // INTERFAZ
         userinterface: "big",
         backgroundcolor: "#1a0d2e",
         fontcolor: "#FFFFFF",
@@ -673,20 +673,25 @@ artwork: [
         visualizercolor: "#FFE000",
         
         volume: "90",
-        autoplay: "true",
-        
-        // ACTUALIZACIÓN DIRECTA DEL TÍTULO EN LUNARADIO
-        onPlay: function() {
-            isConnected = true;
-            initAudioContext();
-            setupMediaSession();
-            requestWakeLock();
-            
-            // Iniciar consulta de título al dar Play
-            obtenerTituloLuna();
-        }
+        autoplay: "true"
     });
 
+    // FUNCIÓN PARA INYECTAR EL TÍTULO DIRECTAMENTE EN EL ELEMENTO DE LUNARADIO
+    function actualizarTituloSpan() {
+        fetch("https://radiostreaming.pro:7201/stats?sid=1&json=1")
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.songtitle) {
+                    $(".extassisnetworkextradionamespan").text(data.songtitle);
+                }
+            })
+            .catch(err => console.error("Error al actualizar título:", err));
+    }
+
+    // Ejecutar inmediatamente y repetir cada 8 segundos
+    actualizarTituloSpan();
+    setInterval(actualizarTituloSpan, 8000);
+});
     // Función que inyecta la canción dentro del texto principal del reproductor
     function obtenerTituloLuna() {
         fetch("https://radiostreaming.pro:7201/stats?sid=1&json=1")
