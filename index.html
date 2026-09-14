@@ -637,9 +637,10 @@ artwork: [
                 );
         }
 
-              $(document).ready(function() {
+              <script>
+        $(document).ready(function() {
             $("#extassisnetwork").lunaradio({
-                streamurl: "https://cast6.my-control-panel.com/proxy/manrique/",
+                streamurl: "https://radiostreaming.pro/8404/stream",
                 radioname: "STEREO REVELACIÓN RADIO",
                 coverimage: "https://stereorevelacionradio.com/images/logo.png",
                 onlycoverimage: false,
@@ -661,12 +662,15 @@ artwork: [
                 color5: "#00CED1",
                 color6: "#9A4FD4",
                 visualizercolor: "#FFE000",
-                streamtype: "shoutcast2",
-                shoutcastpath: "/stream",
-                shoutcastid: "1",
+                
+                // --- CONFIGURACIÓN PARA SONICPANEL ---
+                streamtype: "icecast2",
+                songtitleurl: "https://corsproxy.io/?" + encodeURIComponent("https://radiostreaming.pro:7201/stats?sid=1&json=1"),
+                usestreamcorsproxy: "true",
+                // -------------------------------------
+
                 volume: "90",
                 autoplay: "true",
-                usestreamcorsproxy: "true",
                 
                 onPlay: function() {
                     isConnected = true;
@@ -712,3 +716,5 @@ artwork: [
             }
         });
     </script>
+    </body>
+</html>
