@@ -637,21 +637,17 @@ artwork: [
                 );
         }
 
-$(document).ready(function() {
+        $(document).ready(function() {
     $("#extassisnetwork").lunaradio({
+        // Transmisión directa de audio
         streamurl: "https://radiostreaming.pro/8404/stream",
         radioname: "STEREO REVELACIÓN RADIO",
         
-        // --- CARÁTULA Y METADATOS ---
-        coverimage: "", 
-        onlycoverimage: false, // Permite buscar la portada de la canción
-        fallbackcover: "https://stereorevelacionradio.com/SRR/images/face-150x150.png", // Reemplazar por tu logo .png/.jpg
+        // --- LOGO FIJO DE TU RADIO ---
+        coverimage: "SRR/images/logo-radio.png",
+        onlycoverimage: true, // Bloquea carátulas externas y deja solo tu logo
+        fallbackcover: "SRR/images/logo-radio.png",
         
-        streamtype: "icecast2", // O "shoutcast2" según la plataforma de radiostreaming.pro
-        icecastmountpoint: "/stream",
-        usestreamcorsproxy: "true", // Activa el proxy si el servidor bloquea los metadatos CORS
-        
-        // --- RESTO DE TU CONFIGURACIÓN ---
         userinterface: "big",
         backgroundcolor: "#1a0d2e",
         fontcolor: "#FFFFFF",
@@ -669,6 +665,12 @@ $(document).ready(function() {
         color5: "#00CED1",
         color6: "#9A4FD4",
         visualizercolor: "#FFE000",
+        
+        // Configuración necesaria para reproducir en reproductores Icecast/Shoutcast
+        streamtype: "icecast2",
+        icecastmountpoint: "/stream",
+        usestreamcorsproxy: "true", 
+        
         volume: "90",
         autoplay: "true",
         
