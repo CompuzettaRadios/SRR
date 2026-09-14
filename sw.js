@@ -1,11 +1,11 @@
-const CACHE_VERSION = '2.1.3';
+const CACHE_VERSION = '2.1.4'; // 1. Subimos la versión para forzar la limpieza en los celulares
 const CACHE_NAME = `stereo-revelacion-v${CACHE_VERSION}`;
 
 // URLs para cachear - organizadas por prioridad
 const urlsToCache = [
   './',
   './index.html',
-  './historial.html', // 👈 LÍNEA AGREGADA
+  './historial.html', 
   './manifest.json',
   './AppIcons/android/android-launchericon-48-48.png',
   './AppIcons/android/android-launchericon-72-72.png',
@@ -28,10 +28,12 @@ const urlsToCache = [
   './images/logo-radio_Live.png'
 ];
 
-// URLs que NUNCA deben ser cacheadas
+// URLs que NUNCA deben ser cacheadas (LISTA ACTUALIZADA PARA SONICPANEL)
 const neverCacheUrls = [
-  // Streams de audio
+  // Streams de audio antiguos y nuevos
   'cast6.my-control-panel.com',
+  'radiostreaming.pro', // 2. Bloqueamos tu nuevo servidor de audio para que no se congele
+  ':8330',              // 3. Bloqueamos tu puerto único de SonicPanel
   '/stream',
   'shoutcast',
   'icecast',
@@ -48,6 +50,7 @@ const neverCacheUrls = [
   // APIs externas
   'itunes.apple.com'
 ];
+
 
 // INSTALACIÓN DEL SERVICE WORKER
 self.addEventListener('install', function(event) {
