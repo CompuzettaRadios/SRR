@@ -639,14 +639,14 @@ artwork: [
 
                    $(document).ready(function() {
             $("#extassisnetwork").lunaradio({
-                // 1. Tu nueva URL SSL nativa de transmisión PRO
+                // 1. URL SSL nativa de transmisión PRO
                 streamurl: "https://radiostreaming.pro:7201",
                 radioname: "STEREO REVELACIÓN RADIO",
                 
-                // PROTECCIÓN CRISTIANA: Forzamos a que SOLO se use tu logo oficial
-                coverimage: "https://stereorevelacionradio.com",
-                onlycoverimage: true, // 👈 Bloquea carátulas automáticas/sexuales de SonicPanel
-                fallbackcover: "https://stereorevelacionradio.com",
+                // 2. LOGO OFICIAL (Ruta completa a la imagen para que cargue correctamente)
+                coverimage: "https://stereorevelacionradio.com/SRR/images/logo-radio.png",
+                onlycoverimage: false, // 👈 Se cambia a FALSE para permitir ver los títulos
+                fallbackcover: "https://stereorevelacionradio.com/SRR/images/logo-radio.png",
                 
                 userinterface: "big",
                 backgroundcolor: "#1a0d2e",
@@ -666,9 +666,10 @@ artwork: [
                 color6: "#9A4FD4",
                 visualizercolor: "#FFE000",
                 
-                // 2. Parámetros del motor IceCast PRO
+                // 3. Parámetros del motor IceCast PRO + Endpoint de Metadatos SonicPanel
                 streamtype: "icecast2",
                 icecastmountpoint: "/stream",
+                metadataproxyurl: "https://radiostreaming.pro:7201/cp/get_info.php?p=8404",
                 
                 volume: "90",
                 autoplay: "true",
