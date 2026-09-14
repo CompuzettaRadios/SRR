@@ -637,10 +637,10 @@ artwork: [
                 );
         }
 
-                $(document).ready(function() {
+                    $(document).ready(function() {
             $("#extassisnetwork").lunaradio({
-                // 1. Ponemos tu nuevo enlace seguro IceCast de SonicPanel
-                streamurl: "https://radiostreaming.pro",
+                // 1. Usamos el enlace con puerto seguro que provee los metadatos de tu radio
+                streamurl: "https://radiostreaming.pro:8330",
                 radioname: "STEREO REVELACIÓN RADIO",
                 coverimage: "https://stereorevelacionradio.com",
                 onlycoverimage: false,
@@ -663,15 +663,14 @@ artwork: [
                 color6: "#9A4FD4",
                 visualizercolor: "#FFE000",
                 
-                // 2. Cambiamos el tipo de servidor a IceCast
+                // 2. Ajustes vitales para IceCast en SonicPanel
                 streamtype: "icecast2",
-                
-                // 3. Definimos el punto de montaje obligatorio de SonicPanel
                 icecastmountpoint: "/stream",
                 
                 volume: "90",
                 autoplay: "true",
-                usestreamcorsproxy: "true",
+                // Desactivamos el proxy CORS si el servidor SSL ya es nativo
+                usestreamcorsproxy: "false", 
                 
                 onPlay: function() {
                     isConnected = true;
