@@ -639,19 +639,21 @@ artwork: [
 
         $(document).ready(function() {
     $("#extassisnetwork").lunaradio({
-        streamurl: "https://radiostreaming.pro/8404/stream",
+        // 1. URL Regular de Shoutcast v2 con puerto SSL (visto en tu panel: 7201)
+        streamurl: "https://radiostreaming.pro:7201",
         radioname: "STEREO REVELACIÓN RADIO",
         
-        // --- CARÁTULA Y METADATOS ---
-        coverimage: "", 
-        onlycoverimage: false, // Permite buscar la portada de la canción
-        fallbackcover: "https://stereorevelacionradio.com/SRR/images/face-150x150.png", // Reemplazar por tu logo .png/.jpg
+        // 2. Configuración nativa de Shoutcast v2 para extraer metadatos de SonicPanel
+        streamtype: "shoutcast2",
+        shoutcaststreamid: "1",
+        usestreamcorsproxy: "true", 
         
-        streamtype: "icecast2", // O "shoutcast2" según la plataforma de radiostreaming.pro
-        icecastmountpoint: "/stream",
-        usestreamcorsproxy: "true", // Activa el proxy si el servidor bloquea los metadatos CORS
+        // 3. Ruta exacta a tu logo (relativa a la ubicación de tu index.html)
+        coverimage: "SRR/images/logo-radio.png",
+        onlycoverimage: true, // Mantiene visible únicamente el logo de tu radio
+        fallbackcover: "SRR/images/logo-radio.png",
         
-        // --- RESTO DE TU CONFIGURACIÓN ---
+        // Interfaz y visualizador
         userinterface: "big",
         backgroundcolor: "#1a0d2e",
         fontcolor: "#FFFFFF",
@@ -669,6 +671,7 @@ artwork: [
         color5: "#00CED1",
         color6: "#9A4FD4",
         visualizercolor: "#FFE000",
+        
         volume: "90",
         autoplay: "true",
         
