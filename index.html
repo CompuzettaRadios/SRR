@@ -637,60 +637,57 @@ artwork: [
                 );
         }
 
-        $(document).ready(function() {
-            $("#extassisnetwork").lunaradio({
-                // Usamos la URL de transmisión directa PRO sin puerto para evitar bloqueos del navegador
-                streamurl: "https://radiostreaming.pro/8404/stream",
-                radioname: "STEREO REVELACIÓN RADIO",
-                
-                // Mantenemos tu logo cristiano 100% fijo y protegido
-                coverimage: "https://stereorevelacionradio.com",
-                onlycoverimage: true, 
-                fallbackcover: "https://stereorevelacionradio.com",
-                
-                userinterface: "big",
-                backgroundcolor: "#1a0d2e",
-                fontcolor: "#FFFFFF",
-                hightlightcolor: "#FFE000",
-                fontname: "Segoe UI",
-                scroll: "true",
-                coverstyle: "animated",
-                usevisualizer: "real",
-                visualizertype: "6",
-                multicolorvisualizer: "true",
-                color1: "#FF6B35",
-                color2: "#F7931E", 
-                color3: "#FFD700",
-                color4: "#32CD32",
-                color5: "#00CED1",
-                color6: "#9A4FD4",
-                visualizercolor: "#FFE000",
-                
-                // Cambiamos temporalmente a formato genérico "mp3" para obligar a LunaRadio
-                // a pintar la información del flujo nativo sin depender de la API interna
-                streamtype: "mp3",
-                
-                volume: "90",
-                autoplay: "true",
-                usestreamcorsproxy: "false", 
-                
-                onPlay: function() {
-                    isConnected = true;
-                    initAudioContext();
-                    setupMediaSession();
-                    requestWakeLock();
-                },
-                onStop: function() {
-                    isConnected = false;
-                    releaseWakeLock();
-                },
-                onError: function() {
-                    isConnected = false;
-                    releaseWakeLock();
-                }
-            });
-        });
-
+$(document).ready(function() {
+    $("#extassisnetwork").lunaradio({
+        streamurl: "https://radiostreaming.pro/8404/stream",
+        radioname: "STEREO REVELACIÓN RADIO",
+        
+        // --- CARÁTULA Y METADATOS ---
+        coverimage: "", 
+        onlycoverimage: false, // Permite buscar la portada de la canción
+        fallbackcover: "https://stereorevelacionradio.com/SRR/images/face-150x150.png", // Reemplazar por tu logo .png/.jpg
+        
+        streamtype: "icecast2", // O "shoutcast2" según la plataforma de radiostreaming.pro
+        icecastmountpoint: "/stream",
+        usestreamcorsproxy: "true", // Activa el proxy si el servidor bloquea los metadatos CORS
+        
+        // --- RESTO DE TU CONFIGURACIÓN ---
+        userinterface: "big",
+        backgroundcolor: "#1a0d2e",
+        fontcolor: "#FFFFFF",
+        hightlightcolor: "#FFE000",
+        fontname: "Segoe UI",
+        scroll: "true",
+        coverstyle: "animated",
+        usevisualizer: "real",
+        visualizertype: "6",
+        multicolorvisualizer: "true",
+        color1: "#FF6B35",
+        color2: "#F7931E", 
+        color3: "#FFD700",
+        color4: "#32CD32",
+        color5: "#00CED1",
+        color6: "#9A4FD4",
+        visualizercolor: "#FFE000",
+        volume: "90",
+        autoplay: "true",
+        
+        onPlay: function() {
+            isConnected = true;
+            initAudioContext();
+            setupMediaSession();
+            requestWakeLock();
+        },
+        onStop: function() {
+            isConnected = false;
+            releaseWakeLock();
+        },
+        onError: function() {
+            isConnected = false;
+            releaseWakeLock();
+        }
+    });
+});
         
         document.addEventListener('keydown', function(event) {
             if (event.key === 'F12') event.preventDefault();
