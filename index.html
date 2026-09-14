@@ -693,20 +693,26 @@ artwork: [
                 }
             });
 
-            // LECTURA DIRECTA DE METADATOS DE SONICPANEL
+            // OBTENER TÍTULO CON PROXY ACTIVO (SIN ERROR 403)
             function obtenerTituloSonic() {
-                $.getJSON("https://corsproxy.io/?" + encodeURIComponent("https://radiostreaming.pro:7201/stats?sid=1&json=1"))
-                    .done(function(data) {
-                        if (data && data.songtitle) {
-                            $("#extassisnetworktexttitlespan, .extassisnetworktexttitlespan").text(data.songtitle);
-                        }
-                    });
+                var targetUrl = "https://radiostreaming.pro:7201/stats?sid=1&json=1";
+                var proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(targetUrl);
+
+                $.getJSON(proxyUrl, function(data) {
+                    if (data && data.contents) {
+                        try {
+                            var jsonResponse = JSON.parse(data.contents);
+                            if (jsonResponse.songtitle) {
+                                $("#extassisnetworktexttitlespan, .extassisnetworktexttitlespan").text(jsonResponse.songtitle);
+                            }
+                        } catch(e) {}
+                    }
+                });
             }
 
             obtenerTituloSonic();
             setInterval(obtenerTituloSonic, 10000);
         });
-
 
         
 
