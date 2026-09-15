@@ -366,15 +366,37 @@
   position: relative;
 }
 
-/* FORZAR COLOR EN EL ICONO LIVE */
+/* EFECTO PALPITANTE / LATIDO EN ICONO LIVE */
+@keyframes palpitarLive {
+  0% {
+    color: #FF1744;
+    fill: #FF1744;
+    opacity: 0.6;
+    filter: drop-shadow(0 0 2px rgba(255, 23, 68, 0.4));
+    transform: scale(0.96);
+  }
+  50% {
+    color: #FF5252;
+    fill: #FF5252;
+    opacity: 1;
+    filter: drop-shadow(0 0 10px rgba(255, 82, 82, 0.9));
+    transform: scale(1.08);
+  }
+  100% {
+    color: #FF1744;
+    fill: #FF1744;
+    opacity: 0.6;
+    filter: drop-shadow(0 0 2px rgba(255, 23, 68, 0.4));
+    transform: scale(0.96);
+  }
+}
+
 [class*="live"], 
 [id*="live"],
 .sonic-live,
 .player-live {
-  color: #FF9800 !important;       /* Color Naranja (cambia a #FFE000 para amarillo) */
-  fill: #FF9800 !important;        /* Para imágenes vectoriales SVG */
-  opacity: 1 !important;           /* Elimina la transparencia de apagado */
-  filter: drop-shadow(0 0 5px rgba(255, 152, 0, 0.8)) !important; /* Efecto neón encendido */
+  display: inline-block !important;
+  animation: palpitarLive 1.8s infinite ease-in-out !important;
 }
         
     </style>
