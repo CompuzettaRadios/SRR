@@ -366,27 +366,27 @@
   position: relative;
 }
 
-/* EFECTO PALPITANTE LENTO - ROJO INTENSO */
+/* EFECTO PALPITANTE LENTO - ROJO PURO */
 @keyframes palpitarLive {
   0% {
-    color: #D50000;
-    fill: #D50000;
-    opacity: 0.5;
-    filter: drop-shadow(0 0 2px rgba(213, 0, 0, 0.4));
+    color: #B71C1C;
+    fill: #B71C1C;
+    opacity: 0.4;
+    filter: drop-shadow(0 0 2px rgba(183, 28, 28, 0.4));
     transform: scale(0.97);
   }
   50% {
-    color: #FF0000;
+    color: #FF0000;                  /* Rojo encendido puro */
     fill: #FF0000;
     opacity: 1;
-    filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.9));
+    filter: drop-shadow(0 0 12px rgba(255, 0, 0, 1)); /* Brillo intenso */
     transform: scale(1.05);
   }
   100% {
-    color: #D50000;
-    fill: #D50000;
-    opacity: 0.5;
-    filter: drop-shadow(0 0 2px rgba(213, 0, 0, 0.4));
+    color: #B71C1C;                  /* Rojo oscuro de apagado */
+    fill: #B71C1C;
+    opacity: 0.4;
+    filter: drop-shadow(0 0 2px rgba(183, 28, 28, 0.4));
     transform: scale(0.97);
   }
 }
@@ -396,7 +396,7 @@
 .sonic-live,
 .player-live {
   display: inline-block !important;
-  animation: palpitarLive 3s infinite ease-in-out !important; /* 3 segundos para un ritmo lento y suave */
+  animation: palpitarLive 4.5s infinite ease-in-out !important; /* 4.5 segundos (mucha más lentitud) */
 }
         
     </style>
