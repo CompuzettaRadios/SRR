@@ -211,20 +211,7 @@ self.addEventListener('fetch', function(event) {
     }
   }
 
-  // Manejo general con estrategia Stale-While-Revalidate
-  event.respondWith(
-    caches.match(request).then(function(response) {
-      return response || fetch(request).then(function(networkResponse) {
-        if (networkResponse && networkResponse.status === 200) {
-          caches.open(CACHE_NAME).then(function(cache) {
-            cache.put(request, networkResponse.clone());
-          });
-        }
-        return networkResponse;
-      });
-    })
-  );
-});
+
 // Manejar otros recursos (CSS, JS, imágenes)
   event.respondWith(
     caches.match(request)
