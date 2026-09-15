@@ -302,53 +302,53 @@
   <script>
     // CONFIGURACIÓN
 // VARIABLES GLOBALES
-    let isLoading = false;
-    let retryCount = 0;
-    const maxRetries = 3;
-    const fallbackCover = "images/logo-radio_Live.png";
-    const coverCache = new Map();
+let isLoading = false;
+let retryCount = 0;
+const maxRetries = 3;
+const fallbackCover = "images/logo-radio_Live.png";
+const coverCache = new Map();
 
-    // FUNCIÓN PRINCIPAL CORREGIDA
-    async function fetchHistory() {
-      if (isLoading) return;
-      
-      isLoading = true;
-      const historyContainer = document.getElementById("history");
-      
-      if (!historyContainer.querySelector('.song-card')) {
-        historyContainer.innerHTML = `
-          <div class="loading">
-            <div class="spinner"></div>
-            Cargando historial musical...
-          </div>
-        `;
-      }
-      
-      const targetUrl = "https://radiostreaming.pro/cp/played.php?p=8404";
-      const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(targetUrl) + "&_=" + Date.now();
-      
-      try {
-        console.log(`[HISTORIAL] Consultando historial...`);
-        const res = await fetch(proxyUrl);
-        const data = await res.json();
-        
-        let jsonData = typeof data.contents === 'string' ? JSON.parse(data.contents) : data.contents;
-        
-        if (jsonData && (Array.isArray(jsonData) || typeof jsonData === 'object')) {
-          console.log(`[HISTORIAL] ✓ Datos cargados con éxito`);
-          const historyArray = Array.isArray(jsonData) ? jsonData : Object.values(jsonData);
-          await parseHistory(historyArray);
-          retryCount = 0;
-          isLoading = false;
-          return;
-        }
-      } catch (error) {
-        console.log(`[HISTORIAL] Error consultando API:`, error.message);
-      }
-      
-      showNoDataMessage();
+// FUNCIÓN PRINCIPAL DE HISTORIAL DIRECTA A SONICPANEL
+async function fetchHistory() {
+  if (isLoading) return;
+  
+  isLoading = true;
+  const historyContainer = document.getElementById("history");
+  
+  if (!historyContainer.querySelector('.song-card')) {
+    historyContainer.innerHTML = `
+      <div class="loading">
+        <div class="spinner"></div>
+        Cargando historial musical...
+      </div>
+    `;
+  }
+  
+  // Consulta directa sin proxies intermedios
+  const targetUrl = "https://radiostreaming.pro/cp/played.php?p=8404";
+  
+  try {
+    console.log(`[HISTORIAL] Consultando datos de SonicPanel...`);
+    const res = await fetch(targetUrl);
+    const data = await res.json();
+    
+    // Obtener array de canciones desde la respuesta
+    const songList = Array.isArray(data) ? data : (data.played || data.history || data.songs || Object.values(data));
+    
+    if (songList && songList.length > 0) {
+      console.log(`[HISTORIAL] ✓ Historial obtenido con éxito`);
+      await parseHistory(songList);
+      retryCount = 0;
       isLoading = false;
+      return;
     }
+  } catch (error) {
+    console.log(`[HISTORIAL] Error consultando API de SonicPanel:`, error.message);
+  }
+  
+  showNoDataMessage();
+  isLoading = false;
+}
 
     // PARSEAR EL JSON DEL HISTORIAL DE SONICPANEL
     async function parseHistory(jsonData) {
