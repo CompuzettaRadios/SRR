@@ -1,7 +1,7 @@
-const CACHE_VERSION = '2.1.4'; // 1. Subimos la versión para forzar la limpieza en los celulares
+const CACHE_VERSION = '2.1.5'; // Subimos la versión para forzar la actualización en celulares
 const CACHE_NAME = `stereo-revelacion-v${CACHE_VERSION}`;
 
-// URLs para cachear - organizadas por prioridad
+// URLs para cachear
 const urlsToCache = [
   './',
   './index.html',
@@ -28,31 +28,27 @@ const urlsToCache = [
   './images/logo-radio_Live.png'
 ];
 
-// URLs que NUNCA deben ser cacheadas (LISTA ACTUALIZADA PARA SONICPANEL)
+// URLs que NUNCA deben ser cacheadas
 const neverCacheUrls = [
-  // Streams de audio antiguos y nuevos
   'cast6.my-control-panel.com',
-  'radiostreaming.pro', // 2. Bloqueamos tu nuevo servidor de audio para que no se congele
-  ':8330',              // 3. Bloqueamos tu puerto único de SonicPanel
+  'radiostreaming.pro',
+  ':8330',
+  ':7201',
   '/stream',
   'shoutcast',
   'icecast',
-  // APIs dinámicas
   '/played.html',
   '/api/',
   'php',
   'ajax',
-  // Proxies CORS
   'corsproxy.io',
   'cors-anywhere.herokuapp.com',
   'codetabs.com',
   'allorigins.win',
-  // APIs externas
   'itunes.apple.com'
 ];
 
-
-// INSTALACIÓN DEL SERVICE WORKER
+// 1. INSTALACIÓN DEL SERVICE WORKER
 self.addEventListener('install', function(event) {
   console.log(`[SW] Instalando Service Worker v${CACHE_VERSION}...`);
   
@@ -61,13 +57,11 @@ self.addEventListener('install', function(event) {
       .then(function(cache) {
         console.log(`[SW] Cache abierto: ${CACHE_NAME}`);
         return cache.addAll(urlsToCache.filter(url => {
-          // Solo cachear URLs que no estén en la lista negra
           return !neverCacheUrls.some(blocked => url.includes(blocked));
         }));
       })
       .then(function() {
         console.log('[SW] Recursos cacheados exitosamente');
-        // Forzar activación inmediata
         return self.skipWaiting();
       })
       .catch(function(error) {
@@ -76,7 +70,7 @@ self.addEventListener('install', function(event) {
   );
 });
 
-// ACTIVACIÓN DEL SERVICE WORKER
+// 2. ACTIVACIÓN DEL SERVICE WORKER
 self.addEventListener('activate', function(event) {
   console.log('[SW] Activando Service Worker...');
   event.waitUntil(
@@ -96,67 +90,45 @@ self.addEventListener('activate', function(event) {
   );
 });
 
-// Función para determinar si es una request de navegación
+// Funciones auxiliares
 function isNavigationRequest(request) {
   return request.mode === 'navigate' || 
          (request.method === 'GET' && request.headers.get('accept').includes('text/html'));
 }
 
-// Función para determinar si debe ser cacheado
 function shouldCache(url) {
-  // No cachear streams de audio
-  if (url.includes('cast6.my-control-panel.com') || 
-      url.includes('/stream') ||
-      url.includes('shoutcast') ||
-      url.includes('icecast')) {
-    return false;
-  }
-  
-  // No cachear APIs dinámicas
-  if (url.includes('/api/') || 
-      url.includes('php') ||
-      url.includes('ajax')) {
-    return false;
-  }
-  
-  return true;
+  return !neverCacheUrls.some(blocked => url.includes(blocked));
 }
 
-// Intercepción de requests
+// 3. INTERCEPCIÓN DE REQUESTS (AQUÍ ESTÁ LA CORRECCIÓN)
 self.addEventListener('fetch', function(event) {
   const request = event.request;
-  const url = new URL(request.url);
-  
-  console.log('[SW] Interceptando:', request.url);
-  
-  // Solo manejar requests GET
+
+  // REGLA CLAVE: Si la petición es a un servidor externo (SonicPanel, iTunes, etc.), la dejamos pasar limpia sin interceptar
+  if (!request.url.startsWith(self.location.origin)) {
+    return; 
+  }
+
+  // Solo manejar requests GET locales
   if (request.method !== 'GET') {
-    console.log('[SW] Request no GET, pasando directo');
     return;
   }
 
-  // No interceptar streams de audio y recursos dinámicos
+  // No interceptar recursos no cacheables
   if (!shouldCache(request.url)) {
-    console.log('[SW] Recurso no cacheable, pasando directo:', request.url);
     event.respondWith(fetch(request));
     return;
   }
 
-  // NUEVA LÓGICA: Permitir historial.html específicamente
+  // Manejo de historial.html
   if (request.url.includes('historial.html')) {
-    console.log('[SW] Request de historial.html detectada');
     event.respondWith(
       caches.match(request)
         .then(function(cachedResponse) {
-          if (cachedResponse) {
-            console.log('[SW] Sirviendo historial.html desde cache');
-            return cachedResponse;
-          }
+          if (cachedResponse) return cachedResponse;
 
-          console.log('[SW] Fetching historial.html desde red');
           return fetch(request).then(function(response) {
             if (response && response.status === 200) {
-              // Cachear historial.html
               caches.open(CACHE_NAME).then(function(cache) {
                 cache.put(request, response.clone());
               });
@@ -165,9 +137,7 @@ self.addEventListener('fetch', function(event) {
             throw new Error('No se pudo cargar historial.html');
           });
         })
-        .catch(function(error) {
-          console.error('[SW] Error cargando historial.html:', error);
-          // Retornar respuesta de error específica para historial
+        .catch(function() {
           return new Response(
             `<!DOCTYPE html>
             <html>
@@ -176,13 +146,7 @@ self.addEventListener('fetch', function(event) {
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1">
               <style>
-                body { 
-                  font-family: Arial, sans-serif; 
-                  text-align: center; 
-                  padding: 50px; 
-                  background: linear-gradient(135deg, #1a0d2e 0%, #2d1b69 30%, #16213e 70%, #0f1419 100%); 
-                  color: #fff; 
-                }
+                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #1a0d2e; color: #fff; }
                 h1 { color: #FFE000; }
               </style>
             </head>
@@ -192,22 +156,15 @@ self.addEventListener('fetch', function(event) {
               <button onclick="window.location.reload()">Intentar de nuevo</button>
             </body>
             </html>`,
-            {
-              status: 200,
-              statusText: 'OK',
-              headers: { 'Content-Type': 'text/html' }
-            }
+            { status: 200, headers: { 'Content-Type': 'text/html' } }
           );
         })
     );
     return;
   }
 
-  // Manejar otras requests de navegación (solo para rutas principales)
+  // Manejo de navegación principal
   if (isNavigationRequest(request)) {
-    console.log('[SW] Request de navegación detectada');
-    
-    // Solo redirigir a index.html si es una navegación a la raíz
     if (request.url === self.location.origin + '/' || 
         request.url === self.location.origin + '/index.html' ||
         request.url.endsWith('/')) {
@@ -215,15 +172,10 @@ self.addEventListener('fetch', function(event) {
       event.respondWith(
         caches.match('./index.html')
           .then(function(cachedResponse) {
-            if (cachedResponse) {
-              console.log('[SW] Sirviendo index.html desde cache');
-              return cachedResponse;
-            }
-            
-            console.log('[SW] Fetching index.html desde red');
+            if (cachedResponse) return cachedResponse;
+
             return fetch('./index.html').then(function(response) {
               if (response && response.status === 200) {
-                // Cachear para futuras requests
                 caches.open(CACHE_NAME).then(function(cache) {
                   cache.put('./index.html', response.clone());
                 });
@@ -232,8 +184,7 @@ self.addEventListener('fetch', function(event) {
               throw new Error('No se pudo cargar index.html');
             });
           })
-          .catch(function(error) {
-            console.error('[SW] Error cargando página:', error);
+          .catch(function() {
             return new Response(
               `<!DOCTYPE html>
               <html>
@@ -248,15 +199,11 @@ self.addEventListener('fetch', function(event) {
               </head>
               <body>
                 <h1>STEREO REVELACIÓN RADIO</h1>
-                <p>No hay conexión a internet. La aplicación se cargará cuando se restablezca la conexión.</p>
+                <p>No hay conexión a internet.</p>
                 <button onclick="window.location.reload()">Intentar de nuevo</button>
               </body>
               </html>`,
-              {
-                status: 200,
-                statusText: 'OK',
-                headers: { 'Content-Type': 'text/html' }
-              }
+              { status: 200, headers: { 'Content-Type': 'text/html' } }
             );
           })
       );
@@ -264,7 +211,21 @@ self.addEventListener('fetch', function(event) {
     }
   }
 
-  // Manejar otros recursos (CSS, JS, imágenes)
+  // Manejo general con estrategia Stale-While-Revalidate
+  event.respondWith(
+    caches.match(request).then(function(response) {
+      return response || fetch(request).then(function(networkResponse) {
+        if (networkResponse && networkResponse.status === 200) {
+          caches.open(CACHE_NAME).then(function(cache) {
+            cache.put(request, networkResponse.clone());
+          });
+        }
+        return networkResponse;
+      });
+    })
+  );
+});
+// Manejar otros recursos (CSS, JS, imágenes)
   event.respondWith(
     caches.match(request)
       .then(function(cachedResponse) {
@@ -403,5 +364,3 @@ self.addEventListener('unhandledrejection', function(event) {
   console.error('[SW] Promise rechazada:', event.reason);
   event.preventDefault();
 });
-
-
