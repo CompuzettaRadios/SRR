@@ -366,28 +366,28 @@
   position: relative;
 }
 
-/* EFECTO PALPITANTE LENTO - ROJO PURO */
+/* EFECTO PALPITANTE MODERADO (NIVEL 5 A 10) */
 @keyframes palpitarLive {
   0% {
-    color: #B71C1C;
-    fill: #B71C1C;
-    opacity: 0.4;
-    filter: drop-shadow(0 0 2px rgba(183, 28, 28, 0.4));
-    transform: scale(0.97);
+    color: #FF1744;                  /* Rojo intenso (Nivel 5) */
+    fill: #FF1744;
+    opacity: 0.75;                   /* No baja de 0.75 de opacidad */
+    filter: drop-shadow(0 0 4px rgba(255, 23, 68, 0.5)); /* Mantiene resplandor constante */
+    transform: scale(0.98);
   }
   50% {
-    color: #FF0000;                  /* Rojo encendido puro */
+    color: #FF0000;                  /* Rojo puro al máximo (Nivel 10) */
     fill: #FF0000;
-    opacity: 1;
-    filter: drop-shadow(0 0 12px rgba(255, 0, 0, 1)); /* Brillo intenso */
-    transform: scale(1.05);
+    opacity: 1;                      /* Opacidad total */
+    filter: drop-shadow(0 0 14px rgba(255, 0, 0, 1)); /* Resplandor intenso */
+    transform: scale(1.04);
   }
   100% {
-    color: #B71C1C;                  /* Rojo oscuro de apagado */
-    fill: #B71C1C;
-    opacity: 0.4;
-    filter: drop-shadow(0 0 2px rgba(183, 28, 28, 0.4));
-    transform: scale(0.97);
+    color: #FF1744;                  /* Rojo intenso (Nivel 5) */
+    fill: #FF1744;
+    opacity: 0.75;
+    filter: drop-shadow(0 0 4px rgba(255, 23, 68, 0.5));
+    transform: scale(0.98);
   }
 }
 
@@ -396,7 +396,7 @@
 .sonic-live,
 .player-live {
   display: inline-block !important;
-  animation: palpitarLive 4.5s infinite ease-in-out !important; /* 4.5 segundos (mucha más lentitud) */
+  animation: palpitarLive 3s infinite ease-in-out !important;
 }
         
     </style>
