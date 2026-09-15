@@ -103,7 +103,26 @@
         max-height: 450px;
       }
     }
-  </style>
+
+    /* EFECTO DE DESPLAZAMIENTO Y MARGINACIÓN PARA MÓVILES */
+    @media (max-width: 768px) {
+      #sonic_history div, 
+      #sonic_history p,
+      #sonic_history li {
+        white-space: nowrap !important;   /* Impide que el texto baje a una segunda línea */
+        overflow-x: auto !important;      /* Permite el desplazamiento horizontal táctil */
+        text-overflow: clip !important;   /* Evita los tres puntos (...) para que se vea completo */
+        -webkit-overflow-scrolling: touch;/* Desplazamiento suave en iOS y Android */
+        padding-bottom: 8px;
+      }
+
+      /* Ocultar la barra de scroll horizontal para una vista limpia */
+      #sonic_history div::-webkit-scrollbar,
+      #sonic_history p::-webkit-scrollbar {
+        display: none;
+      }
+    }
+</style>
 </head>
 <body>
   <div class="container">
