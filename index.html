@@ -365,6 +365,17 @@
 #extassisnetwork {
   position: relative;
 }
+
+/* FORZAR COLOR EN EL ICONO LIVE */
+[class*="live"], 
+[id*="live"],
+.sonic-live,
+.player-live {
+  color: #FF9800 !important;       /* Color Naranja (cambia a #FFE000 para amarillo) */
+  fill: #FF9800 !important;        /* Para imágenes vectoriales SVG */
+  opacity: 1 !important;           /* Elimina la transparencia de apagado */
+  filter: drop-shadow(0 0 5px rgba(255, 152, 0, 0.8)) !important; /* Efecto neón encendido */
+}
         
     </style>
 </head>
