@@ -308,9 +308,8 @@ const maxRetries = 3;
 const fallbackCover = "images/logo-radio_Live.png";
 const coverCache = new Map();
 
-// FUNCIÓN PRINCIPAL DE HISTORIAL DIRECTA A SONICPANEL
-// FUNCIÓN PRINCIPAL CON JSONP PARA EVITAR BLOQUEO CORS
-function fetchHistory() {
+// FUNCIÓN PRINCIPAL DE HISTORIAL VÍA PROXY ALLORIGINS
+async function fetchHistory() {
   if (isLoading) return;
   isLoading = true;
 
@@ -324,41 +323,32 @@ function fetchHistory() {
     `;
   }
 
-  // Eliminamos cualquier script JSONP previo
-  const oldScript = document.getElementById("sonicpanel-history-script");
-  if (oldScript) oldScript.remove();
+  const targetUrl = "https://radiostreaming.pro/cp/played.php?p=8404";
+  const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(targetUrl) + "&_=" + Date.now();
 
-  // Función callback global que SonicPanel ejecutará al responder
-  window.sonicpanelHistoryCallback = async function(data) {
-    try {
-      console.log(`[HISTORIAL] ✓ Datos recibidos de SonicPanel:`, data);
-      const songList = Array.isArray(data) ? data : (data.played || data.history || data.songs || Object.values(data));
-      
+  try {
+    console.log(`[HISTORIAL] Consultando historial vía Proxy...`);
+    const res = await fetch(proxyUrl);
+    const data = await res.json();
+
+    if (data && data.contents) {
+      let jsonData = typeof data.contents === 'string' ? JSON.parse(data.contents) : data.contents;
+      const songList = Array.isArray(jsonData) ? jsonData : (jsonData.played || jsonData.history || jsonData.songs || Object.values(jsonData));
+
       if (songList && songList.length > 0) {
+        console.log(`[HISTORIAL] ✓ Historial obtenido con éxito`);
         await parseHistory(songList);
         retryCount = 0;
         isLoading = false;
         return;
       }
-    } catch (e) {
-      console.log("[HISTORIAL] Error procesando respuesta JSONP:", e);
     }
-    showNoDataMessage();
-    isLoading = false;
-  };
+  } catch (error) {
+    console.log(`[HISTORIAL] Error consultando API vía proxy:`, error.message);
+  }
 
-  // Petición script dinámica que los navegadores NO bloquean por CORS
-  const script = document.createElement("script");
-  script.id = "sonicpanel-history-script";
-  script.src = "https://radiostreaming.pro/cp/played.php?p=8404&callback=sonicpanelHistoryCallback&_=" + Date.now();
-  
-  script.onerror = function() {
-    console.log("[HISTORIAL] Error cargando el script de SonicPanel");
-    showNoDataMessage();
-    isLoading = false;
-  };
-
-  document.body.appendChild(script);
+  showNoDataMessage();
+  isLoading = false;
 }
 
     
