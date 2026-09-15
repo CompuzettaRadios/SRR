@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script id='sonic_js' data-port='8404' src='https://radiostreaming.pro/cp/widgets.js?r=480'></script>
   <title>Historial Radio</title>
-  <style>
+<style>
     * {
       margin: 0;
       padding: 0;
@@ -27,7 +27,7 @@
     
     .header h1 {
       color: #FFE000;
-      font-size: 1.2rem;
+      font-size: 1.4rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -40,249 +40,68 @@
       height: calc(100vh - 100px);
     }
     
-    /* GRID RESPONSIVE PARA HISTORIAL */
-    #history {
+    /* CONTENEDOR ADAPTATIVO DEL HISTORIAL SONICPANEL */
+    #sonic_history {
       background: rgba(10, 10, 30, 0.4);
       backdrop-filter: blur(15px);
       border-radius: 15px;
       border: 1px solid rgba(255, 224, 0, 0.2);
-      padding: 15px;
+      padding: 15px 20px;
       height: 100%;
-      overflow-y: auto;
+      max-height: 520px;       /* Altura visible para controlar cuántas se ven */
+      overflow-y: auto;        /* Scroll suave si supera la altura */
       
-      /* GRID ADAPTATIVO */
-      display: grid;
-      gap: 10px;
-      
-      /* MÓVIL VERTICAL: 1 columna */
-      grid-template-columns: 1fr;
+      /* ESTILOS DE TEXTO Y ESPACIADO */
+      font-size: 1.05rem;      /* Tamaño de letra más grande y legible */
+      line-height: 2.2;        /* Doble espaciado entre canciones */
+      color: #ffffff;
     }
 
-    /* TABLET Y MÓVIL HORIZONTAL: 2 columnas */
-    @media (min-width: 480px) and (orientation: landscape),
-           (min-width: 600px) {
-      #history {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-      }
+    /* FORMATO INDIVIDUAL SI SONICPANEL GENERA PARRAFOS O DIVS */
+    #sonic_history div, 
+    #sonic_history p,
+    #sonic_history line {
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 224, 0, 0.15); /* Línea divisoria elegante */
+      transition: background 0.2s ease;
     }
 
-    /* PANTALLAS GRANDES: 3 columnas máximo */
-    @media (min-width: 900px) {
-      #history {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 15px;
-      }
-    }
-    
-    .song-card {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 224, 0, 0.1);
-      transition: all 0.3s ease;
-      min-height: 80px;
-    }
-    
-    .song-card:hover {
-      background: rgba(255, 224, 0, 0.1);
-      border-color: rgba(255, 224, 0, 0.3);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(255, 224, 0, 0.2);
-    }
-    
-    .album-cover {
-      width: 60px;
-      height: 60px;
-      border-radius: 8px;
-      object-fit: cover;
-      flex-shrink: 0;
-      background: rgba(255, 224, 0, 0.1);
-      border: 1px solid rgba(255, 224, 0, 0.2);
-    }
-
-    /* CARÁTULAS MÁS PEQUEÑAS EN GRID MÚLTIPLE */
-    @media (min-width: 480px) and (orientation: landscape),
-           (min-width: 600px) {
-      .album-cover {
-        width: 50px;
-        height: 50px;
-      }
-      
-      .song-card {
-        padding: 10px;
-        gap: 10px;
-        min-height: 70px;
-      }
-    }
-    
-    .song-info {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    
-    .artist {
-      font-weight: 700;
+    #sonic_history div:hover,
+    #sonic_history p:hover {
       color: #FFE000;
-      line-height: 1.2;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      text-transform: uppercase;
-      text-shadow: 0 0 8px rgba(255, 224, 0, 0.4);
-      font-size: 0.95rem;
-    }
-    
-    .title {
-      font-weight: 400;
-      color: rgba(255, 255, 255, 0.8);
-      line-height: 1.3;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-size: 0.85rem;
     }
 
-    /* TEXTO MÁS COMPACTO EN GRIDS MÚLTIPLES */
-    @media (min-width: 480px) and (orientation: landscape),
-           (min-width: 600px) {
-      .artist {
-        font-size: 0.85rem;
-      }
-      
-      .title {
-        font-size: 0.75rem;
-      }
-    }
-    
-    .loading {
-      grid-column: 1 / -1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 200px;
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 1rem;
-    }
-    
-    .spinner {
-      width: 20px;
-      height: 20px;
-      border: 2px solid rgba(255, 224, 0, 0.2);
-      border-top: 2px solid #FFE000;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-right: 10px;
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    .error {
-      grid-column: 1 / -1;
-      text-align: center;
-      color: rgba(255, 255, 255, 0.6);
-      padding: 40px;
-      font-size: 1rem;
-    }
-
-    /* SCROLLBAR PERSONALIZADO */
-    #history::-webkit-scrollbar {
+    /* SCROLLBAR PERSONALIZADO AMARILLO */
+    #sonic_history::-webkit-scrollbar {
       width: 8px;
     }
 
-    #history::-webkit-scrollbar-track {
+    #sonic_history::-webkit-scrollbar-track {
       background: rgba(255, 224, 0, 0.1);
       border-radius: 10px;
     }
 
-    #history::-webkit-scrollbar-thumb {
-      background: rgba(255, 224, 0, 0.3);
+    #sonic_history::-webkit-scrollbar-thumb {
+      background: rgba(255, 224, 0, 0.4);
       border-radius: 10px;
     }
 
-    #history::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 224, 0, 0.5);
+    #sonic_history::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 224, 0, 0.7);
     }
-    
+
+    /* AJUSTES RESPONSIVOS PARA MÓVILES */
     @media (max-width: 480px) {
       body {
         padding: 10px;
       }
-      
-      .song-card {
-        padding: 10px;
-        gap: 10px;
+
+      #sonic_history {
+        font-size: 0.95rem;   /* Tamaño óptimo para pantallas pequeñas */
+        line-height: 2.0;     /* Espaciado ajustado para celular */
+        padding: 12px 15px;
+        max-height: 450px;
       }
-      
-      .album-cover {
-        width: 50px;
-        height: 50px;
-      }
-
-      .artist {
-        font-size: 0.85rem;
-      }
-
-      .title {
-        font-size: 0.75rem;
-      }
-    }
-
-    /* EFECTO DE CARGA PARA LAS IMÁGENES */
-    .album-cover.loading {
-      background: linear-gradient(90deg, rgba(255, 224, 0, 0.1) 25%, rgba(255, 224, 0, 0.3) 50%, rgba(255, 224, 0, 0.1) 75%);
-      background-size: 200% 100%;
-      animation: loading 1.5s infinite;
-    }
-
-    @keyframes loading {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-
-    /* MENSAJE CUANDO NO HAY DATOS */
-    .no-data {
-      grid-column: 1 / -1;
-      text-align: center;
-      color: rgba(255, 255, 255, 0.6);
-      padding: 60px 20px;
-      font-size: 1rem;
-    }
-
-    .no-data img {
-      width: 80px;
-      height: 80px;
-      opacity: 0.6;
-      margin-bottom: 15px;
-    }
-
-    /* RETRY BUTTON */
-    .retry-btn {
-      background: rgba(255, 224, 0, 0.2);
-      border: 1px solid rgba(255, 224, 0, 0.4);
-      color: #FFE000;
-      padding: 10px 20px;
-      border-radius: 25px;
-      cursor: pointer;
-      margin-top: 15px;
-      font-size: 0.9rem;
-      transition: all 0.3s ease;
-    }
-
-    .retry-btn:hover {
-      background: rgba(255, 224, 0, 0.3);
-      border-color: rgba(255, 224, 0, 0.6);
-      transform: translateY(-2px);
     }
   </style>
 </head>
